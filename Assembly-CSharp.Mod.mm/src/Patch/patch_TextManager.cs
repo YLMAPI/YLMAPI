@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS0626 // Method, operator, or accessor is marked external and has no attributes on it
 
 using MonoMod;
+using System.IO;
 using UnityEngine;
 
 class patch_TextManager : TextManager {
@@ -9,23 +10,26 @@ class patch_TextManager : TextManager {
     [MonoModIgnore]
     private string[][] stringData;
     [MonoModIgnore]
-    private string[] tables;
+    public new string[] tables;
+
+    [MonoModIgnore]
+    private extern string GetLocale();
+    public string INTERNAL_GetLocale() => GetLocale();
 
     public extern void orig_LoadTables();
     // new as we're hiding TextManager's LoadTables.
     public new void LoadTables() {
         orig_LoadTables();
 
-        /*
-        for (int i = 0; i < stringData.Length; i++) {
-            string[] strings = stringData[i];
-            if (strings == null) // Who knows?
-                continue;
-            string key = tables[i] ?? "null";
-            for (int j = 0; j < strings.Length; j++)
-                strings[j] = $"{key} {{{i}, {j}}}";
-        }
-        */
+        // This runs before YLMod.EntryPoint
+        // TODO: Once the YLMod.EntryPoint runs before TextManager, don't manually invoke YLMod.OnTextLoad on EntryPoint
+        YLMod.OnTextLoad?.Invoke(this, tables, stringData);
     }
+
+}
+public static class TextManagerExt {
+
+    public static string GetLocale(this TextManager tm)
+        => ((patch_TextManager) tm).INTERNAL_GetLocale();
 
 }

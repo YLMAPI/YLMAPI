@@ -8,6 +8,7 @@ using System.Text;
 using SGUI;
 using Rewired;
 using UEInput = UnityEngine.Input;
+using System.IO;
 
 public static class YLMod {
 
@@ -45,17 +46,74 @@ public static class YLMod {
         }
     }
 
+    public static string GameDirectory;
+    public static string ModsDirectory;
+    public static string TextsDirectory;
+
     public static Action OnUpdate;
+    public static Action<TextManager, string[], string[][]> OnTextLoad;
 
     public static void EntryPoint() {
+        Console.WriteLine($"Initializing Yooka-Laylee Mod {BaseUIVersion}");
         YLModBehaviour ylmb = YLModBehaviour.instance;
 
-        YLModGUI.Init();
-
-        YLMod.Log($"Yooka-Laylee Mod {BaseUIVersion}");
+        GameDirectory = Path.GetDirectoryName(Path.GetFullPath(Application.dataPath));
+        Console.WriteLine($"Game directory: {GameDirectory}");
+        ModsDirectory = Path.Combine(GameDirectory, "mods");
+        Directory.CreateDirectory(ModsDirectory);
+        TextsDirectory = Path.Combine(ModsDirectory, "texts");
+        Directory.CreateDirectory(TextsDirectory);
 
         SceneManager.sceneLoaded += OnSceneLoaded;
         SceneManager.sceneUnloaded += OnSceneUnloaded;
+
+        OnTextLoad += (tm, tables, stringData) => {
+            for (int i = 0; i < stringData.Length; i++) {
+                string[] strings = stringData[i];
+                if (strings == null) // Who knows?
+                    continue;
+                string key = tables[i] ?? $"texts_{i}";
+
+                string file = Path.Combine(YLMod.TextsDirectory, tm.GetLocale());
+                Directory.CreateDirectory(file);
+                file = Path.Combine(file, key + ".txt");
+                if (!File.Exists(file)) {
+                    using (StreamWriter writer = new StreamWriter(file))
+                        for (int j = 0; j < strings.Length; j++)
+                            writer.WriteLine($"{j}: {strings[j]}");
+                } else {
+                    int index = -1;
+                    string text = "";
+                    using (StreamReader reader = new StreamReader(file))
+                        while (!reader.EndOfStream) {
+                            string line = reader.ReadLine();
+                            if (line.StartsWith("#"))
+                                continue;
+                            int indexOfColon = line.IndexOf(':');
+                            if (indexOfColon <= 0) {
+                                text += "\n" + line;
+                                continue;
+                            }
+                            int indexOld = index;
+                            if (!int.TryParse(line.Substring(0, indexOfColon), out index)) {
+                                index = -1;
+                                text += "\n" + line;
+                                continue;
+                            }
+                            if (indexOld != -1)
+                                strings[indexOld] = text;
+                            if (indexOfColon + 2 > line.Length)
+                                text = "";
+                            else
+                                text = line.Substring(indexOfColon + 2);
+                        }
+                    if (index != -1)
+                        strings[index] = text;
+                }
+            }
+        };
+
+        YLModGUI.Init();
 
         YLModFreeCamera.Init();
     }
