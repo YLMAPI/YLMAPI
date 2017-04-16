@@ -15,6 +15,8 @@ public static class YLModGUI {
 
     public static SGroup HelpGroup;
 
+    private static HashSet<Canvas> _HiddenCanvases = new HashSet<Canvas>();
+
     public static void Init() {
         if (Root != null)
             return;
@@ -111,13 +113,9 @@ public static class YLModGUI {
                         new SLabel("R1 / RB (hold): Run") {
                             Foreground = Color.gray
                         },
-                        new SLabel("L2 / LT: Reduce move* speed") {
-                            Foreground = Color.gray
-                        },
-                        new SLabel("R2 / RT: Increase move* speed") {
-                            Foreground = Color.gray
-                        },
-                        new SLabel("L2 + R2 / LT + RT: Reset move* speed") {
+                        new SLabel("L2 / LT: Reduce move speed"),
+                        new SLabel("R2 / RT: Increase move speed"),
+                        new SLabel("L2 + R2 / LT + RT: Reset move speed") {
                             Foreground = Color.gray
                         },
 
@@ -183,7 +181,19 @@ public static class YLModGUI {
 
         if (Input.GetKeyDown(KeyCode.F11)) {
             Root.Visible = !Root.Visible;
-            UnityEngine.Object.FindObjectsOfType<Canvas>().ForEach((c, i) => c.enabled = Root.Visible);
+            if (Root.Visible) {
+                foreach (Canvas c in _HiddenCanvases)
+                    if (c != null)
+                        c.enabled = true;
+                _HiddenCanvases.Clear();
+            } else {
+                UnityEngine.Object.FindObjectsOfType<Canvas>().ForEach((c, i) => {
+                    if (!c.enabled)
+                        return;
+                    c.enabled = false;
+                    _HiddenCanvases.Add(c);
+                });
+            }
         }
     }
 

@@ -91,10 +91,84 @@ public static class YLMod {
             if (input == null)
                 return false;
 
+            // TODO: This mapping list.
             switch (button) {
-                case "A":
                 case "Jump":
+                case "A":
                     return input.GetButton(9);
+
+                case "Fly":
+                    return input.GetButton(10);
+
+                case "Context":
+                    return input.GetButton(12);
+
+                case "TongueEdibleItem":
+                case "B":
+                    return input.GetButton(14);
+
+                case "Invisibility":
+                    return input.GetButton(15);
+
+                case "BasicAttack":
+                case "ShootEatenItem":
+                case "X":
+                    return input.GetButton(16);
+
+                case "WheelSpin":
+                    return input.GetButton(18);
+
+                case "FartBubble":
+                    return input.GetButton(19);
+
+                case "Crouch":
+                case "LT":
+                case "L2":
+                    return input.GetButton(20);
+
+                case "GroundPound":
+                    return input.GetButton(21);
+
+                case "SwimUnderwater":
+                    return input.GetButton(22);
+
+                case "Wheel":
+                case "RT":
+                case "R2":
+                    return input.GetButton(23);
+
+                case "SonarBlastAttack":
+                    return input.GetButton(27);
+
+                case "SonarBoomAttack":
+                    return input.GetButton(28);
+
+                case "SonarShieldAttack":
+                    return input.GetButton(29);
+
+                case "Aiming":
+                case "LS":
+                case "L3":
+                    return input.GetButton(30);
+
+                case "EmoteHappy":
+                case "DPadUp":
+                    return input.GetButton(39);
+
+                case "EmoteTaunt":
+                case "DPadRight":
+                    return input.GetButton(40);
+
+                case "EmoteDisappointed":
+                case "DPadDown":
+                    return input.GetButton(41);
+
+                case "EmoteAngry":
+                case "DPadLeft":
+                    return input.GetButton(42);
+
+                case "SwimUnderwaterAlt":
+                    return input.GetButton(51);
             }
 
             Func<Player, bool> f;

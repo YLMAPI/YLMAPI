@@ -125,7 +125,7 @@ public static class YLModFreeCamera {
         YLMod.Input.AxisMap["FreeCam Internal Speed"] =
             input =>
                 Input.mouseScrollDelta.y +
-                (YLMod.Input.GetButton("LT") ? -1f : YLMod.Input.GetButton("RT") ? 1f : 0f);
+                (YLMod.Input.GetButton("LT") ? -0.4f : YLMod.Input.GetButton("RT") ? 0.4f : 0f);
         YLMod.Input.AxisMap["FreeCam Game Speed"] =
             input =>
                 ( YLMod.Input.GetButton("FreeCam Internal Speed Switch") ? YLMod.Input.GetAxis("FreeCam Internal Speed") : 0f);
@@ -155,14 +155,14 @@ public static class YLModFreeCamera {
                 if (PrevCamera != null) {
                     FreeCamera.transform.position = PrevCamera.transform.position;
                     FreeCamera.transform.rotation = PrevCamera.transform.rotation;
+                    FreeCamera.GetComponent<SimpleSmoothMouseLook>().targetDirection = PrevCamera.transform.rotation.eulerAngles;
+                    FreeCamera.GetComponent<SimpleSmoothMouseLook>().mouseAbsolute = Vector2.zero;
                     FreeCamera.fieldOfView = PrevCamera.fieldOfView;
                     if (FreeCamera.fieldOfView < 10f)
                         FreeCamera.fieldOfView = 75f;
                     PrevCamera.enabled = false;
                 }
                 FreeCamera.enabled = true;
-
-                FreeCamera.GetComponent<SimpleSmoothMouseLook>().targetDirection = FreeCamera.transform.rotation.eulerAngles;
 
                 if (CameraManager.Instance != null)
                     ApplyDOFToFreeCam();

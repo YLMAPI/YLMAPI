@@ -8,16 +8,13 @@ using System.Text;
 using UnityEngine;
 using MonoMod;
 
-class patch_SystemManager : SystemManager {
+class patch_InputButton : InputButton {
 
-    public extern Player orig_GetInput(PlayerType playerType);
-    public override Player GetInput(PlayerType playerType) {
-        if (YLModFreeCamera.IsEnabled) {
-            if (PlayerManager.Instance?.GetPlayer(0) != null && playerType == PlayerType.MainPlayer)
-                playerType = PlayerType.ArcadePlayer2;
-        }
-
-        return orig_GetInput(playerType);
+    public extern void orig_Update(Player rewiredPlayer, int input, bool isEnabled);
+    public void Update(Player rewiredPlayer, int input, bool isEnabled) {
+        if (YLModFreeCamera.IsEnabled)
+            return;
+        orig_Update(rewiredPlayer, input, isEnabled);
     }
 
 }

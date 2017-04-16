@@ -72,7 +72,6 @@
     <Compile Include="src\Mod\YLModInternalExt.cs" />
     <Compile Include="src\Mod\YLModGUI.cs" />
     <Compile Include="src\Patch\patch_CameraManager.cs" />
-    <Compile Include="src\Patch\patch_LoadingScreenController.cs" />
     <Compile Include="src\Patch\patch_PauseMainScreenController.cs" />
     <Compile Include="src\Patch\patch_SplashScreenController.cs" />
     <Compile Include="src\Patch\patch_TextManager.cs" />
