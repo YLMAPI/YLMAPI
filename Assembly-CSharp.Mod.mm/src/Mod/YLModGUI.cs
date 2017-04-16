@@ -5,17 +5,20 @@ using System;
 using UnityEngine.UI;
 using SGUI;
 using System.IO;
+using UnityEngine.SceneManagement;
 
 public static class YLModGUI {
 
     public static SGUIRoot Root;
 
+    public const float Padding = 2;
+
     public static SGroup LogGroup;
     public static bool IsLogBig = false;
 
     public static SGroup MainGroup;
-
     public static SGroup HelpGroup;
+    public static SGroup SceneGroup;
 
     private static HashSet<Canvas> _HiddenCanvases = new HashSet<Canvas>();
 
@@ -35,14 +38,22 @@ public static class YLModGUI {
             },
 
             Children = {
-                new SLabel($"Yooka-Laylee Mod {YLMod.BaseUIVersion}"),
+                new SLabel($"Yooka-Laylee Mod {YLMod.BaseUIVersion}") {
+                    Foreground = Color.grey
+                },
+
+                new SLabel("Help:") {
+                    OnUpdateStyle = elem => {
+                        elem.Position = new Vector2(elem.Previous.Position.x, elem.Previous.Position.y + elem.Previous.Size.y + Padding);
+                    }
+                },
 
                 (HelpGroup = new SGroup {
                     AutoLayout = elem => elem.AutoLayoutVertical,
                     AutoLayoutPadding = 16f,
                     OnUpdateStyle = elem => {
-                        elem.Position = new Vector2(0, elem.Previous.Position.y + elem.Previous.Size.y + 2);
-                        elem.Size = new Vector2(512, elem.Parent.Size.y - elem.Position.y - 2);
+                        elem.Position = new Vector2(elem.Previous.Position.x, elem.Previous.Position.y + elem.Previous.Size.y + Padding);
+                        elem.Size = new Vector2(512, elem.Parent.Size.y - elem.Position.y - Padding);
                     },
                     Children = {
                         new SGroup() {
@@ -86,7 +97,34 @@ public static class YLModGUI {
                     }
                 }),
 
+                new SLabel("Scenes:") {
+                    OnUpdateStyle = elem => {
+                        elem.Position = new Vector2(elem.Previous.Previous.Position.x + elem.Previous.Size.x + Padding, elem.Previous.Previous.Position.y);
+                    }
+                },
 
+                (SceneGroup = new SGroup {
+                    AutoLayout = elem => elem.AutoLayoutVertical,
+                    AutoLayoutPadding = 16f,
+                    OnUpdateStyle = elem => {
+                        elem.Position = new Vector2(elem.Previous.Position.x, elem.Previous.Position.y + elem.Previous.Size.y + Padding);
+                        elem.Size = new Vector2(512, elem.Parent.Size.y - elem.Position.y - Padding);
+                    },
+                    With = {
+                        new SDModifier {
+                            OnInit = elem => {
+                                for (int i = 0; i < SceneManager.sceneCount; i++) {
+                                    Scene scene = SceneManager.GetSceneAt(i);
+                                    elem.Children.Add(new SButton($"{i}: {scene.name}") {
+                                        OnClick = button => {
+                                            LoadingScreenController.LoadScene(scene.name, "", "");
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }),
 
             }
         };
@@ -123,7 +161,7 @@ public static class YLModGUI {
 
     public static void HelpGroupUpdateStyle(SElement elem) {
         // elem.Position = elem.Previous.Position + new Vector2(0, elem.Previous.Size.y + elem.Backend.LineHeight * 2);
-        elem.Size = new Vector2(512, elem.Backend.LineHeight * elem.Children.Count);
+        elem.Size = new Vector2(elem.Parent.Size.x, elem.Backend.LineHeight * elem.Children.Count);
     }
 
     public static void Update() {
