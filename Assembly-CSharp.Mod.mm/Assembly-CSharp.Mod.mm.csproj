@@ -62,7 +62,9 @@
   <ItemGroup>
     <Compile Include="src\Mod\ModProfile.cs" />
     <Compile Include="src\Mod\YLMod.Input.cs" />
+    <Compile Include="src\Mod\YLModMenuExt.cs" />
     <Compile Include="src\Patch\patch_InputStickXZ.cs" />
+    <Compile Include="src\Patch\patch_FrontendMainScreenController.cs" />
     <Compile Include="src\Patch\patch_SystemManager.cs" />
     <Compile Include="src\Patch\patch_FollowCamera.cs" />
     <Compile Include="src\Third-Party\SimpleSmoothMouseLook.cs" />

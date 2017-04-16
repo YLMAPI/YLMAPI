@@ -9,24 +9,29 @@ using UnityEngine.SceneManagement;
 
 public static class YLModGUI {
 
-    public static SGUIRoot Root;
-
     public const float Padding = 2;
+
+    public static bool IsGameHUDVisible = true;
+
+    public static SGUIRoot Root;
 
     public static SGroup LogGroup;
     public static bool IsLogBig = false;
 
     public static SGroup MainGroup;
     public static SGroup HelpGroup;
-    public static SGroup SceneGroup;
+    public static SGroup ScenesGroup;
 
-    private static HashSet<Canvas> _HiddenCanvases = new HashSet<Canvas>();
+    private readonly static HashSet<Canvas> _HiddenCanvases = new HashSet<Canvas>();
 
     public static void Init() {
         if (Root != null)
             return;
 
         YLMod.OnUpdate += Update;
+        SceneManager.activeSceneChanged += (sceneA, sceneB) => {
+            ShowGameGUI();
+        };
 
         Root = SGUIRoot.Setup();
 
@@ -49,6 +54,7 @@ public static class YLModGUI {
                 },
 
                 (HelpGroup = new SGroup {
+                    ScrollDirection = SGroup.EDirection.Vertical,
                     AutoLayout = elem => elem.AutoLayoutVertical,
                     AutoLayoutPadding = 16f,
                     OnUpdateStyle = elem => {
@@ -103,26 +109,13 @@ public static class YLModGUI {
                     }
                 },
 
-                (SceneGroup = new SGroup {
+                (ScenesGroup = new SGroup {
+                    ScrollDirection = SGroup.EDirection.Vertical,
                     AutoLayout = elem => elem.AutoLayoutVertical,
-                    AutoLayoutPadding = 16f,
+                    AutoLayoutPadding = Padding,
                     OnUpdateStyle = elem => {
                         elem.Position = new Vector2(elem.Previous.Position.x, elem.Previous.Position.y + elem.Previous.Size.y + Padding);
-                        elem.Size = new Vector2(512, elem.Parent.Size.y - elem.Position.y - Padding);
-                    },
-                    With = {
-                        new SDModifier {
-                            OnInit = elem => {
-                                for (int i = 0; i < SceneManager.sceneCount; i++) {
-                                    Scene scene = SceneManager.GetSceneAt(i);
-                                    elem.Children.Add(new SButton($"{i}: {scene.name}") {
-                                        OnClick = button => {
-                                            LoadingScreenController.LoadScene(scene.name, "", "");
-                                        }
-                                    });
-                                }
-                            }
-                        }
+                        elem.Size = new Vector2(256, elem.Parent.Size.y - elem.Position.y - Padding);
                     }
                 }),
 
@@ -157,6 +150,8 @@ public static class YLModGUI {
                 new SLabel()
             }
         };
+
+        _ListScenes();
     }
 
     public static void HelpGroupUpdateStyle(SElement elem) {
@@ -184,13 +179,13 @@ public static class YLModGUI {
         }
 
         if (Input.GetKeyDown(KeyCode.F11)) {
-            ToggleAll();
+            ToggleGameGUI();
         }
     }
 
-    public static void ToggleAll() {
-        Root.Visible = !Root.Visible;
-        if (Root.Visible) {
+    public static void ToggleGameGUI() {
+        IsGameHUDVisible = !IsGameHUDVisible;
+        if (IsGameHUDVisible) {
             foreach (Canvas c in _HiddenCanvases)
                 if (c != null)
                     c.enabled = true;
@@ -205,13 +200,103 @@ public static class YLModGUI {
         }
     }
 
-    public static void ShowAll() {
-        if (!Root.Visible)
-            ToggleAll();
+    public static void ShowGameGUI() {
+        if (!IsGameHUDVisible)
+            ToggleGameGUI();
     }
-    public static void HideAll() {
-        if ( Root.Visible)
-            ToggleAll();
+    public static void HideGameGUI() {
+        if ( IsGameHUDVisible)
+            ToggleGameGUI();
+    }
+
+    private static void _AddScene(string scene) {
+        ScenesGroup.Children.Add(new SButton(scene) {
+            Alignment = TextAnchor.MiddleLeft,
+            OnClick = button => {
+                LoadingScreenController.LoadScene(scene, "", "");
+            }
+        });
+    }
+    private static IEnumerator _AddScenes(params string[] scenes) {
+        for (int i = 0; i < scenes.Length; i++) {
+            _AddScene(scenes[i]);
+            yield return null;
+        }
+    }
+    private static void _ListScenes() {
+        /*
+        _AddScene("Frontend_Menu");
+        _AddScene("Arcade_Frontend");
+        _AddScene("Arcade_Frontend_Standalone");
+
+        YLModBehaviour.instance.StartCoroutine(_ListMainScenes());
+        YLModBehaviour.instance.StartCoroutine(_ListArcadeScenes());
+        */
+
+        YLModBehaviour.instance.StartCoroutine(_AddScenes(
+            "Frontend_Menu",
+            "Arcade_Frontend",
+            "Arcade_Frontend_Standalone",
+            "Level_01_Jungle",
+            "Level_02_Glacier",
+            "Level_03_Swamp",
+            "Level_01_Jungle_Expanded",
+            "Level_02_Glacier_Expanded",
+            "Level_00_Hub_A",
+            "Level_00_Hub_B",
+            "Level_00_Hub_C",
+            "Level_04_Casino",
+            "Level_05_Space",
+            "Quiz_01_Jungle",
+            "Quiz_02_GlacierSwamp",
+            "Quiz_03_CasinoSpace",
+            "Arcade_Bees",
+            "Arcade_Brawl",
+            "Level_07_FinalBoss",
+            "Level_05_Space_Expanded",
+            "Level_03_Swamp_Expanded",
+            "Level_04_Casino_Expanded",
+            "Arcade_Brawl",
+            "Arcade_Brawl_Standalone",
+            "Arcade_Karts",
+            "Arcade_Karts_Standalone",
+            "Arcade_Bees",
+            "Arcade_Bees_Standalone",
+            "Arcade_Temple",
+            "Arcade_Temple_Standalone",
+            "Arcade_Shooter",
+            "Arcade_Shooter_Standalone",
+            "Arcade_Hurdles",
+            "Arcade_Hurdles_Standalone",
+            "Arcade_Flappy",
+            "Arcade_Flappy_Standalone",
+            "Arcade_Maze",
+            "Arcade_Maze_Standalone"
+        ));
+    }
+    private static IEnumerator _ListMainScenes() {
+        SceneInfo[] scenes;
+        while ((scenes = ScenesInfo.Instance?.ScenesData?.LookupTable) == null)
+            yield return null;
+        for (int i = 0; i < scenes.Length; i++) {
+            SceneInfo scene = scenes[i];
+            if (string.IsNullOrEmpty(scene.SceneName)) {
+                YLMod.Log($"Found nameless scene info: {i} {scene.HashID} {scene.Scene?.name ?? "null"}");
+                continue;
+            }
+            _AddScene(scene.SceneName);
+            yield return null;
+        }
+    }
+    private static IEnumerator _ListArcadeScenes() {
+        ArcadeGameInfo[] arcadeGames;
+        while ((arcadeGames = ArcadeGamesManager.instance?.arcadeGamesSetup?.data) == null)
+            yield return null;
+        for (int i = 0; i < arcadeGames.Length; i++) {
+            _AddScene(arcadeGames[i].sceneName);
+            _AddScene(arcadeGames[i].sceneName + "_Standalone");
+            yield return null;
+        }
     }
 
 }

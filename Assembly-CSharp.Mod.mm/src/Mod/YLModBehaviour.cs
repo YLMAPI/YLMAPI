@@ -11,7 +11,7 @@ using Rewired;
 public class YLModBehaviour : MonoBehaviourSingleton<YLModBehaviour> {
 
     public new void Awake() {
-        tag = "DoNotPause";
+        gameObject.tag = "DoNotPause";
     }
 
     public void Update() {

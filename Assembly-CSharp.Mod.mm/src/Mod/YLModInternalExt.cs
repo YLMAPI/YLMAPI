@@ -5,6 +5,14 @@ using UnityEngine.SceneManagement;
 
 static class YLModInternalExt {
 
+    public static string GetPath(this Transform t) {
+        string path = t.name;
+        Transform parent = t;
+        while ((parent = parent.parent) != null)
+            path = parent.name + "/" + path;
+        return path;
+    }
+
     public static StringBuilder AppendIndentation(this StringBuilder builder, int depth, string str = "    ") {
         while (depth-- > 0)
             builder.Append(str);
@@ -39,6 +47,10 @@ static class YLModInternalExt {
         builder
             .AppendIndentation(depth)
             .AppendFormat("Name: {0}", t.name)
+            .AppendLine();
+        builder
+            .AppendIndentation(depth)
+            .AppendFormat("Path: {0}", t.GetPath())
             .AppendLine();
 
         builder.AppendLine();

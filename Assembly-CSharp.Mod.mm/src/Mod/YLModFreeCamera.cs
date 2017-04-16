@@ -182,7 +182,6 @@ public static class YLModFreeCamera {
                     Foreground = Color.black
                 },
                 new SLabel("Press F1 to view controls."),
-                new SLabel("Press F11 to view hide all GUI."),
                 new SLabel(),
                 (GUIGameSpeed = new SLabel()),
                 (GUIMoveSpeed = new SLabel()),
@@ -284,7 +283,7 @@ public static class YLModFreeCamera {
         if (YLMod.Input.GetButtonDown("FreeCam GUI Toggle"))
             IsGUIVisible = !IsGUIVisible;
         if (YLMod.Input.GetButtonDown("FreeCam Game GUI Toggle Ext"))
-            YLModGUI.ToggleAll();
+            YLModGUI.ToggleGameGUI();
 
         /*
         if (CameraManager.Instance != null) {
@@ -303,7 +302,7 @@ public static class YLModFreeCamera {
             Speed = DefaultSpeed;
 
         float speed = Speed;
-        if (YLMod.Input.GetButtonDown("FreeCam Run"))
+        if (YLMod.Input.GetButton("FreeCam Run"))
             speed *= 4f;
 
         Vector3 dir = Vector3.zero;
@@ -324,13 +323,13 @@ public static class YLModFreeCamera {
         camt.position += Vector3.up * YLMod.Input.GetAxis("FreeCam Y Movement") * speed * SpeedF;
 
         float timeScalePrev = Time.timeScale;
-        Time.timeScale = Mathf.Max(0f, Time.timeScale + YLMod.Input.GetAxis("FreeCam Game Speed") * (
+        Time.timeScale = Mathf.Clamp(Time.timeScale + YLMod.Input.GetAxis("FreeCam Game Speed") * (
             Time.timeScale < 0.24999f ? 0.01f :
             Time.timeScale < 1.99999f ? 0.05f :
             Time.timeScale < 7.99999f ? 0.5f :
             Time.timeScale < 15.99999f ? 1f :
             4f
-        ));
+        ), 0f, 100f);
 
         if (YLMod.Input.GetButtonDown("FreeCam Game Speed Reset"))
             Time.timeScale = 1f;
