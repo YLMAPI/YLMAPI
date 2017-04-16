@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E438D8F7-4149-47B5-ACF6-7EDC15D00AE7}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>YookaLayleeMod</RootNamespace>
+    <AssemblyName>Assembly-CSharp.Mod.mm</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\libs\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\libs\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\libs\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod">
+      <HintPath>..\libs\MonoMod.exe</HintPath>
+    </Reference>
+    <Reference Include="Rewired_Core">
+      <HintPath>..\libs\Rewired_Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\libs\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Networking">
+      <HintPath>..\libs\UnityEngine.Networking.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\libs\UnityEngine.UI.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="src\Mod\ModProfile.cs" />
+    <Compile Include="src\Patch\patch_InputStickXZ.cs" />
+    <Compile Include="src\Patch\patch_SystemManager.cs" />
+    <Compile Include="src\Patch\patch_FollowCamera.cs" />
+    <Compile Include="src\Third-Party\SimpleSmoothMouseLook.cs" />
+    <Compile Include="src\UnityEnumerator.cs" />
+    <Compile Include="src\Mod\YLMod.cs" />
+    <Compile Include="src\Mod\YLModExt.cs" />
+    <Compile Include="src\Mod\YLModFreeCamera.cs" />
+    <Compile Include="src\Mod\YLModInternalExt.cs" />
+    <Compile Include="src\Mod\YLModGUI.cs" />
+    <Compile Include="src\Patch\patch_CameraManager.cs" />
+    <Compile Include="src\Patch\patch_LoadingScreenController.cs" />
+    <Compile Include="src\Patch\patch_PauseMainScreenController.cs" />
+    <Compile Include="src\Patch\patch_SplashScreenController.cs" />
+    <Compile Include="src\Patch\patch_TextManager.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Mod\YLModBehaviour.cs" />
+    <Compile Include="src\TextProxy.cs" />
+    <Compile Include="..\SGUI\src\Animations\SAnimationSequence.cs" />
+    <Compile Include="..\SGUI\src\Animations\SEasings.cs" />
+    <Compile Include="..\SGUI\src\Animations\SFadeAnimation.cs" />
+    <Compile Include="..\SGUI\src\Animations\SFadeInAnimation.cs" />
+    <Compile Include="..\SGUI\src\Animations\SFadeOutAnimation.cs" />
+    <Compile Include="..\SGUI\src\Animations\SFadeOutShrinkSequence.cs" />
+    <Compile Include="..\SGUI\src\Animations\SShrinkAnimation.cs" />
+    <Compile Include="..\SGUI\src\Backends\SGUIIMBackend.cs" />
+    <Compile Include="..\SGUI\src\Backends\SGUIIMEditorBackend.cs" />
+    <Compile Include="..\SGUI\src\DFEXT\SGUIDFInput.cs" />
+    <Compile Include="..\SGUI\src\DotNetEXT\AddingNewEventArgs.cs" />
+    <Compile Include="..\SGUI\src\DotNetEXT\AddingNewEventHandler.cs" />
+    <Compile Include="..\SGUI\src\DotNetEXT\BindingList.cs" />
+    <Compile Include="..\SGUI\src\DotNetEXT\IBindingList.cs" />
+    <Compile Include="..\SGUI\src\DotNetEXT\ICancelAddNew.cs" />
+    <Compile Include="..\SGUI\src\DotNetEXT\IRaiseItemChangedEvents.cs" />
+    <Compile Include="..\SGUI\src\EMouseStatus.cs" />
+    <Compile Include="..\SGUI\src\Elements\SButton.cs" />
+    <Compile Include="..\SGUI\src\Elements\SGroup.cs" />
+    <Compile Include="..\SGUI\src\Elements\SImage.cs" />
+    <Compile Include="..\SGUI\src\Elements\SLabel.cs" />
+    <Compile Include="..\SGUI\src\Elements\SPreloader.cs" />
+    <Compile Include="..\SGUI\src\Elements\SRect.cs" />
+    <Compile Include="..\SGUI\src\Elements\STextField.cs" />
+    <Compile Include="..\SGUI\src\Elements\SWindowTitleBar.cs" />
+    <Compile Include="..\SGUI\src\ISGUIBackend.cs" />
+    <Compile Include="..\SGUI\src\Modifiers\SInGameModifier.cs" />
+    <Compile Include="..\SGUI\src\Modifiers\SRandomLabelModifier.cs" />
+    <Compile Include="..\SGUI\src\SAnimation.cs" />
+    <Compile Include="..\SGUI\src\SElement.cs" />
+    <Compile Include="..\SGUI\src\SGUIExtensions.cs" />
+    <Compile Include="..\SGUI\src\SGUIRoot.cs" />
+    <Compile Include="..\SGUI\src\SModifier.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

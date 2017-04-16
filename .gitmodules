@@ -1,0 +1,3 @@
+[submodule "SGUI"]
+	path = SGUI
+	url = https://github.com/0x0ade/SGUI.git
