@@ -84,6 +84,7 @@ public static partial class YLMod {
             _InitButtonMap(24, "RB", "R1");
             _InitButtonMap_Not(50, "RB", "R1");
             _InitButtonMap(25, "LB", "L1");
+            _InitButtonMap_Not(input => UEInput.mouseScrollDelta.y < 0f);
             _InitButtonMap(27, "SonarBlastAttack");
             _InitButtonMap(28, "SonarBoomAttack");
             _InitButtonMap(29, "SonarShieldAttack");
@@ -114,6 +115,13 @@ public static partial class YLMod {
                 string name = names[i];
                 Func<Player, bool> f = ButtonMap[name];
                 ButtonMap[name] = input => !input.GetButton(id) && f(input);
+            }
+        }
+        private static void _InitButtonMap_Not(Func<Player, bool> not, params string[] names) {
+            for (int i = names.Length - 1; i > -1; --i) {
+                string name = names[i];
+                Func<Player, bool> f = ButtonMap[name];
+                ButtonMap[name] = input => !not(input) && f(input);
             }
         }
 

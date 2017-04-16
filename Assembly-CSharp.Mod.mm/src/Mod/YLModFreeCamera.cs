@@ -306,14 +306,6 @@ public static class YLModFreeCamera {
         if (YLMod.Input.GetButtonDown("FreeCam Run"))
             speed *= 4f;
 
-        GUIGameSpeed.Text = $"Game speed: {Mathf.FloorToInt(Time.timeScale * 100f)}%";
-        GUIMoveSpeed.Text = $"Movement speed: {(speed / DefaultSpeed * 100f).ToString("N0")}%";
-        GUISceneName.Text = $"Scene (level): {SceneManager.GetActiveScene().name}";
-        Vector3 pos = camt.position;
-        Vector3 rot = camt.eulerAngles;
-        GUIPosition.Text = $"Position: {pos.x.ToString("0000.00")}, {pos.y.ToString("0000.00")}, {pos.z.ToString("0000.00")}";
-        GUIRotation.Text = $"Rotation: {rot.x.ToString("0000.00")}, {rot.y.ToString("0000.00")}, {rot.z.ToString("0000.00")}";
-
         Vector3 dir = Vector3.zero;
 
         dir += camt.forward * YLMod.Input.GetAxis("Vertical");
@@ -347,10 +339,16 @@ public static class YLModFreeCamera {
             Time.timeScale = 0f;
 
         int scaleRound = Mathf.FloorToInt(Time.timeScale * 100f);
-        if (scaleRound % 10 == 9)
+        if (Time.timeScale >= 0.25f && scaleRound % 10 == 9)
             Time.timeScale = (scaleRound + 1) / 100f;
-        else if (scaleRound % 10 == 1)
-            Time.timeScale = (scaleRound - 1) / 100f;
+
+        GUIGameSpeed.Text = $"Game speed: {Mathf.FloorToInt(Time.timeScale * 100f)}%";
+        GUIMoveSpeed.Text = $"Movement speed: {(speed / DefaultSpeed * 100f).ToString("N0")}%";
+        GUISceneName.Text = $"Scene (level): {SceneManager.GetActiveScene().name}";
+        Vector3 pos = camt.position;
+        Vector3 rot = camt.eulerAngles;
+        GUIPosition.Text = $"Position: {pos.x.ToString("0000.00")}, {pos.y.ToString("0000.00")}, {pos.z.ToString("0000.00")}";
+        GUIRotation.Text = $"Rotation: {rot.x.ToString("0000.00")}, {rot.y.ToString("0000.00")}, {rot.z.ToString("0000.00")}";
 
     }
 
