@@ -84,7 +84,7 @@ public static partial class YLMod {
             _InitButtonMap(24, "RB", "R1");
             _InitButtonMap_Not(50, "RB", "R1");
             _InitButtonMap(25, "LB", "L1");
-            _InitButtonMap_Not(input => UEInput.mouseScrollDelta.y < 0f);
+            _InitButtonMap_Not(input => UEInput.mouseScrollDelta.y > 0f, "LB", "L1");
             _InitButtonMap(27, "SonarBlastAttack");
             _InitButtonMap(28, "SonarBoomAttack");
             _InitButtonMap(29, "SonarShieldAttack");
