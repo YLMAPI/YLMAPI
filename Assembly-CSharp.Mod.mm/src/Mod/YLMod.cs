@@ -10,7 +10,7 @@ using Rewired;
 using UEInput = UnityEngine.Input;
 using System.IO;
 
-public static class YLMod {
+public static partial class YLMod {
 
     public readonly static Version BaseVersion = new Version(0, 3, 0);
     // The following line will be replaced by Travis.
@@ -51,6 +51,7 @@ public static class YLMod {
     public static string TextsDirectory;
 
     public static Action OnUpdate;
+    public static Action OnLateUpdate;
     public static Action<TextManager, string[], string[][]> OnTextLoad;
 
     public static void EntryPoint() {
@@ -66,6 +67,8 @@ public static class YLMod {
 
         SceneManager.sceneLoaded += OnSceneLoaded;
         SceneManager.sceneUnloaded += OnSceneUnloaded;
+
+        OnLateUpdate += Input.LateUpdate;
 
         OnTextLoad += (tm, tables, stringData) => {
             for (int i = 0; i < stringData.Length; i++) {
@@ -139,128 +142,6 @@ public static class YLMod {
         );
 
         YLModGUI.LogGroup.ScrollPosition = new Vector2(0f, float.MaxValue);
-    }
-
-    public static class Input {
-
-        public static Dictionary<string, Func<Player, bool>> ButtonMap = new Dictionary<string, Func<Player, bool>>();
-        public static bool GetButton(string button) {
-            Player input = ReInput.players.GetSystemPlayer();
-            if (input == null)
-                return false;
-
-            // TODO: This mapping list.
-            switch (button) {
-                case "Jump":
-                case "A":
-                    return input.GetButton(9);
-
-                case "Fly":
-                    return input.GetButton(10);
-
-                case "Context":
-                    return input.GetButton(12);
-
-                case "TongueEdibleItem":
-                case "B":
-                    return input.GetButton(14);
-
-                case "Invisibility":
-                    return input.GetButton(15);
-
-                case "BasicAttack":
-                case "ShootEatenItem":
-                case "X":
-                    return input.GetButton(16);
-
-                case "WheelSpin":
-                    return input.GetButton(18);
-
-                case "FartBubble":
-                    return input.GetButton(19);
-
-                case "Crouch":
-                case "LT":
-                case "L2":
-                    return input.GetButton(20);
-
-                case "GroundPound":
-                    return input.GetButton(21);
-
-                case "SwimUnderwater":
-                    return input.GetButton(22);
-
-                case "Wheel":
-                case "RT":
-                case "R2":
-                    return input.GetButton(23);
-
-                case "SonarBlastAttack":
-                    return input.GetButton(27);
-
-                case "SonarBoomAttack":
-                    return input.GetButton(28);
-
-                case "SonarShieldAttack":
-                    return input.GetButton(29);
-
-                case "Aiming":
-                case "LS":
-                case "L3":
-                    return input.GetButton(30);
-
-                case "EmoteHappy":
-                case "DPadUp":
-                    return input.GetButton(39);
-
-                case "EmoteTaunt":
-                case "DPadRight":
-                    return input.GetButton(40);
-
-                case "EmoteDisappointed":
-                case "DPadDown":
-                    return input.GetButton(41);
-
-                case "EmoteAngry":
-                case "DPadLeft":
-                    return input.GetButton(42);
-
-                case "SwimUnderwaterAlt":
-                    return input.GetButton(51);
-            }
-
-            Func<Player, bool> f;
-            if (ButtonMap.TryGetValue(button, out f) && f != null)
-                return f(input);
-            return false;
-        }
-
-        public static Dictionary<string, Func<Player, float>> AxisMap = new Dictionary<string, Func<Player, float>>();
-        public static float GetAxis(string axis) => GetAxisRaw(axis);
-        public static float GetAxisRaw(string axis) {
-            Player input = ReInput.players.GetSystemPlayer();
-            if (input == null)
-                return 0f;
-
-            switch (axis) {
-                case "Horizontal":
-                    return input.GetAxis(0) + (UEInput.GetKey(KeyCode.A) ? -1f : UEInput.GetKey(KeyCode.D) ? 1f : 0f);
-                case "Vertical":
-                    return input.GetAxis(1) + (UEInput.GetKey(KeyCode.S) ? -1f : UEInput.GetKey(KeyCode.W) ? 1f : 0f);
-                case "Y Movement":
-                    return UEInput.GetKey(KeyCode.F) ? -1f : UEInput.GetKey(KeyCode.R) ? 1f : 0f;
-                case "Mouse X":
-                    return input.GetAxisRaw(4) * 0.5f + input.GetAxisRaw(47) * 0.07f;
-                case "Mouse Y":
-                    return input.GetAxisRaw(5) * 0.5f + input.GetAxisRaw(48) * 0.07f;
-            }
-
-            Func<Player, float> f;
-            if (AxisMap.TryGetValue(axis, out f) && f != null)
-                return f(input);
-            return 0f;
-        }
-
     }
 
 }

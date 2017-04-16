@@ -13,6 +13,8 @@ public static class YLModGUI {
     public static SGroup LogGroup;
     public static bool IsLogBig = false;
 
+    public static SGroup MainGroup;
+
     public static SGroup HelpGroup;
 
     private static HashSet<Canvas> _HiddenCanvases = new HashSet<Canvas>();
@@ -24,6 +26,70 @@ public static class YLModGUI {
         YLMod.OnUpdate += Update;
 
         Root = SGUIRoot.Setup();
+
+        MainGroup = new SGroup() {
+            Visible = false,
+
+            OnUpdateStyle = elem => {
+                elem.Fill(0);
+            },
+
+            Children = {
+                new SLabel($"Yooka-Laylee Mod {YLMod.BaseUIVersion}"),
+
+                (HelpGroup = new SGroup {
+                    AutoLayout = elem => elem.AutoLayoutVertical,
+                    AutoLayoutPadding = 16f,
+                    OnUpdateStyle = elem => {
+                        elem.Position = new Vector2(0, elem.Previous.Position.y + elem.Previous.Size.y + 2);
+                        elem.Size = new Vector2(512, elem.Parent.Size.y - elem.Position.y - 2);
+                    },
+                    Children = {
+                        new SGroup() {
+                            Background = new Color(0f, 0f, 0f, 0f),
+                            AutoLayout = elem => elem.AutoLayoutVertical,
+                            AutoLayoutVerticalStretch = false,
+                            AutoLayoutPadding = 0f,
+                            OnUpdateStyle = HelpGroupUpdateStyle,
+                            Children = {
+                                new SLabel("Debug Log:") {
+                                    Background = Color.white,
+                                    Foreground = Color.black
+                                },
+                                new SLabel("Keyboard:") {
+                                    Background = Color.white,
+                                    Foreground = Color.black
+                                },
+                                new SLabel("HOME / POS1: Toggle log"),
+                                new SLabel("PAGE UP / DOWN: Scroll")
+                            }
+                        },
+
+                        new SGroup() {
+                            Background = new Color(0f, 0f, 0f, 0f),
+                            AutoLayout = elem => elem.AutoLayoutVertical,
+                            AutoLayoutVerticalStretch = false,
+                            AutoLayoutPadding = 0f,
+                            OnUpdateStyle = HelpGroupUpdateStyle,
+                            Children = {
+                                new SLabel("Miscellaneous:") {
+                                    Background = Color.white,
+                                    Foreground = Color.black
+                                },
+                                new SLabel("Keyboard:") {
+                                    Background = Color.white,
+                                    Foreground = Color.black
+                                },
+                                new SLabel("F11: Toggle game GUI"),
+                            }
+                        }
+                    }
+                }),
+
+
+
+            }
+        };
 
         LogGroup = new SGroup() {
             Visible = false,
@@ -53,114 +119,10 @@ public static class YLModGUI {
                 new SLabel()
             }
         };
-
-        HelpGroup = new SGroup() {
-            Visible = false,
-
-            OnUpdateStyle = elem => {
-                elem.Fill(0);
-            },
-
-            Children = {
-                new SLabel($"Yooka-Laylee Mod {YLMod.BaseUIVersion}"),
-
-                new SGroup() {
-                    Background = new Color(0f, 0f, 0f, 0f),
-                    AutoLayout = elem => elem.AutoLayoutVertical,
-                    AutoLayoutVerticalStretch = false,
-                    AutoLayoutPadding = 0f,
-                    OnUpdateStyle = HelpGroupUpdateStyle,
-                    Children = {
-                        new SLabel("Debug Log:") {
-                            Background = Color.white,
-                            Foreground = Color.black
-                        },
-                        new SLabel("Keyboard:") {
-                            Background = Color.white,
-                            Foreground = Color.black
-                        },
-                        new SLabel("HOME / POS1: Show and hide"),
-                        new SLabel("PAGE UP / DOWN: Scroll")
-                    }
-                },
-
-                new SGroup() {
-                    Background = new Color(0f, 0f, 0f, 0f),
-                    AutoLayout = elem => elem.AutoLayoutVertical,
-                    AutoLayoutVerticalStretch = false,
-                    AutoLayoutPadding = 0f,
-                    OnUpdateStyle = HelpGroupUpdateStyle,
-                    Children = {
-                        new SLabel("Free-Roam Camera:") {
-                            Background = Color.white,
-                            Foreground = Color.black
-                        },
-                        new SLabel("Special thanks to Shesez (Boundary Break)!") {
-                            Background = Color.white,
-                            Foreground = Color.black
-                        },
-
-                        new SLabel("Controller (not finished):") {
-                            Background = Color.white,
-                            Foreground = Color.black
-                        },
-                        new SLabel("Press L3 and R3 (into the two sticks) at the same time."),
-                        new SLabel("Left stick: First person movement"),
-                        new SLabel("Right stick: Rotate camera"),
-                        new SLabel("L1 / LB (hold): Switch between game speed / move speed change") {
-                            Foreground = Color.gray
-                        },
-                        new SLabel("R1 / RB (hold): Run") {
-                            Foreground = Color.gray
-                        },
-                        new SLabel("L2 / LT: Reduce move speed"),
-                        new SLabel("R2 / RT: Increase move speed"),
-                        new SLabel("L2 + R2 / LT + RT: Reset move speed") {
-                            Foreground = Color.gray
-                        },
-
-                        new SLabel("Keyboard:") {
-                            Background = Color.white,
-                            Foreground = Color.black
-                        },
-                        new SLabel("Press F12."),
-                        new SLabel("WASD: First person movement"),
-                        new SLabel("R / F: Move straight up / down"),
-                        new SLabel("Mouse: Rotate camera"),
-                        new SLabel("Shift (hold): Run"),
-                        new SLabel("Control (hold): Switch between game / move speed change"),
-                        new SLabel("Scroll up: Reduce move* speed"),
-                        new SLabel("Scroll down: Increase move* speed"),
-                        new SLabel("Middle mouse button: Reset move* speed")
-
-                    }
-                },
-
-                new SGroup() {
-                    Background = new Color(0f, 0f, 0f, 0f),
-                    AutoLayout = elem => elem.AutoLayoutVertical,
-                    AutoLayoutVerticalStretch = false,
-                    AutoLayoutPadding = 0f,
-                    OnUpdateStyle = HelpGroupUpdateStyle,
-                    Children = {
-                        new SLabel("Other:") {
-                            Background = Color.white,
-                            Foreground = Color.black
-                        },
-                        new SLabel("Keyboard:") {
-                            Background = Color.white,
-                            Foreground = Color.black
-                        },
-                        new SLabel("F11: Show and hide game GUI"),
-                    }
-                },
-
-            }
-        };
     }
 
     public static void HelpGroupUpdateStyle(SElement elem) {
-        elem.Position = elem.Previous.Position + new Vector2(0, elem.Previous.Size.y + elem.Backend.LineHeight * 2);
+        // elem.Position = elem.Previous.Position + new Vector2(0, elem.Previous.Size.y + elem.Backend.LineHeight * 2);
         elem.Size = new Vector2(512, elem.Backend.LineHeight * elem.Children.Count);
     }
 
@@ -176,25 +138,42 @@ public static class YLModGUI {
             LogGroup.UpdateStyle();
         }
 
-        if (Input.GetKeyDown(KeyCode.F1))
-            HelpGroup.Visible = !HelpGroup.Visible;
+        if (Input.GetKeyDown(KeyCode.F1)) {
+            MainGroup.Visible = !MainGroup.Visible;
+            Cursor.visible = MainGroup.Visible;
+            Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Object.FindObjectsOfType<SimpleSmoothMouseLook>().ForEach((ssml, i) => ssml.enabled = !MainGroup.Visible);
+        }
 
         if (Input.GetKeyDown(KeyCode.F11)) {
-            Root.Visible = !Root.Visible;
-            if (Root.Visible) {
-                foreach (Canvas c in _HiddenCanvases)
-                    if (c != null)
-                        c.enabled = true;
-                _HiddenCanvases.Clear();
-            } else {
-                UnityEngine.Object.FindObjectsOfType<Canvas>().ForEach((c, i) => {
-                    if (!c.enabled)
-                        return;
-                    c.enabled = false;
-                    _HiddenCanvases.Add(c);
-                });
-            }
+            ToggleAll();
         }
+    }
+
+    public static void ToggleAll() {
+        Root.Visible = !Root.Visible;
+        if (Root.Visible) {
+            foreach (Canvas c in _HiddenCanvases)
+                if (c != null)
+                    c.enabled = true;
+            _HiddenCanvases.Clear();
+        } else {
+            UnityEngine.Object.FindObjectsOfType<Canvas>().ForEach((c, i) => {
+                if (!c.enabled)
+                    return;
+                c.enabled = false;
+                _HiddenCanvases.Add(c);
+            });
+        }
+    }
+
+    public static void ShowAll() {
+        if (!Root.Visible)
+            ToggleAll();
+    }
+    public static void HideAll() {
+        if ( Root.Visible)
+            ToggleAll();
     }
 
 }
