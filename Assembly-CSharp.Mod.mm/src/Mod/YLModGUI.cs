@@ -397,6 +397,7 @@ public static class YLModGUI {
     private static Coroutine _C_RefreshHierarchy;
     public static void RefreshHierarchy() {
         _C_RefreshHierarchy = _RefreshHierarchy(_C_RefreshHierarchy).StartGlobal();
+        Inspect(null);
     }
     private static IEnumerator _RefreshHierarchy(Coroutine prev) {
         if (prev != null) {
@@ -475,7 +476,7 @@ public static class YLModGUI {
                 new SButton(t.name) {
                     Alignment = TextAnchor.MiddleLeft,
                     OnClick = elem => {
-                        // Inspect(t);
+                        Inspect(t);
                         elem.Next.Visible = !elem.Next.Visible;
                         HierarchyGroup.UpdateStyle();
                     }
@@ -501,6 +502,68 @@ public static class YLModGUI {
         };
 
         return group;
+    }
+    public static void Inspect(Transform t) {
+        InspectorGroup.Children.Clear();
+        if (t == null)
+            return;
+
+        new SButton("Refresh") {
+            Parent = HierarchyGroup,
+            Icon = YLModContent.Load<Texture2D>("ylmod/gui/refresh"),
+            IconScale = new Vector2(0.25f, 0.25f),
+            Alignment = TextAnchor.MiddleLeft,
+            OnClick = elem => {
+                Inspect(t);
+            }
+        };
+
+        new SLabel(t.name) {
+            Parent = InspectorGroup,
+            Alignment = TextAnchor.MiddleCenter
+        };
+        Vector3 pos = t.position;
+        Vector3 rot = t.eulerAngles;
+        new SLabel($"Position: {pos.x.ToString("0000.00")}, {pos.y.ToString("0000.00")}, {pos.z.ToString("0000.00")}") {
+            Parent = InspectorGroup,
+            Alignment = TextAnchor.MiddleLeft
+        };
+        new SLabel($"Rotation: {rot.x.ToString("0000.00")}, {rot.y.ToString("0000.00")}, {rot.z.ToString("0000.00")}") {
+            Parent = InspectorGroup,
+            Alignment = TextAnchor.MiddleLeft
+        };
+        new SButton("Is Object Active") {
+            Parent = InspectorGroup,
+            Alignment = TextAnchor.MiddleLeft,
+            With = { new SCheckboxModifier() {
+                GetValue = b => t.gameObject.activeSelf,
+                SetValue = (b, v) => t.gameObject.SetActive(v)
+            }}
+        };
+        new SButton("Move Camera To Object") {
+            Parent = InspectorGroup,
+            Icon = YLModContent.Load<Texture2D>("ylmod/gui/camera"),
+            IconScale = new Vector2(0.25f, 0.25f),
+            Alignment = TextAnchor.MiddleLeft,
+            OnClick = elem => {
+                if (t == null || Camera.main == null)
+                    return;
+                Camera.main.transform.position = t.position;
+            }
+        };
+
+        Behaviour[] components = t.GetComponents<Behaviour>();
+        for (int i = 0; i < components.Length; i++) {
+            Behaviour c = components[i];
+            new SButton(c.GetType().Name) {
+                Parent = InspectorGroup,
+                Alignment = TextAnchor.MiddleLeft,
+                With = { new SCheckboxModifier() {
+                    GetValue = b => c.enabled,
+                    SetValue = (b, v) => c.enabled = v
+                }}
+            };
+        }
     }
 
 }
