@@ -414,6 +414,16 @@ public static class YLModGUI {
         };
         yield return null;
 
+        new SButton("Refresh") {
+            Parent = HierarchyGroup,
+            Icon = YLModContent.Load<Texture2D>("ylmod/gui/refresh"),
+            IconScale = new Vector2(0.25f, 0.25f),
+            Alignment = TextAnchor.MiddleLeft,
+            OnClick = elem => {
+                RefreshHierarchy();
+            }
+        };
+
         IEnumerator e = _AddTransformChildrenGroups(null, null);
         while (e.MoveNext())
             yield return e.Current;

@@ -128,6 +128,9 @@
     <EmbeddedResource Include="Content\ylmod\gui\checkbox_unchecked.png">
       <LogicalName>Content/ylmod/gui/checkbox_unchecked.png</LogicalName>
     </EmbeddedResource>
+	    <EmbeddedResource Include="Content\ylmod\gui\refresh.png">
+      <LogicalName>Content/ylmod/gui/refresh.png</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="Content\ylmod\scenes.txt">
       <LogicalName>Content/ylmod/scenes.txt</LogicalName>
     </EmbeddedResource>
