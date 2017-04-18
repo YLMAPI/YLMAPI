@@ -10,6 +10,13 @@ using UnityEngine.SceneManagement;
 public static class YLModGUI {
 
     public const float Padding = 2;
+    public const float PaddingColumnElements = 32;
+
+    public static readonly Color HeaderBackground = new Color(0.9f, 0.9f, 0.9f, 1f);
+    public static readonly Color HeaderForeground = new Color(0.1f, 0.1f, 0.1f, 1f);
+
+    public static readonly Color Header2Background = new Color(0.7f, 0.7f, 0.7f, 1f);
+    public static readonly Color Header2Foreground = new Color(0.2f, 0.2f, 0.2f, 1f);
 
     public static bool IsGameHUDVisible = true;
 
@@ -21,6 +28,7 @@ public static class YLModGUI {
     public static SGroup MainGroup;
     public static SGroup HelpGroup;
     public static SGroup ScenesGroup;
+    public static SGroup SettingsGroup;
 
     private readonly static HashSet<Canvas> _HiddenCanvases = new HashSet<Canvas>();
 
@@ -33,7 +41,20 @@ public static class YLModGUI {
             ShowGameGUI();
         };
 
+
         Root = SGUIRoot.Setup();
+
+        Root.Background = new Color(
+            /*
+            0.27f,
+            0.31f,
+            0.33f,
+            */
+            0.17f,
+            0.21f,
+            0.23f,
+            Root.Background.a
+        );
 
         MainGroup = new SGroup() {
             Visible = false,
@@ -44,7 +65,8 @@ public static class YLModGUI {
 
             Children = {
                 new SLabel($"Yooka-Laylee Mod {YLMod.BaseUIVersion}") {
-                    Foreground = Color.grey
+                    Background = YLModGUI.HeaderBackground,
+                    Foreground = YLModGUI.HeaderForeground
                 },
 
                 new SLabel("Help:") {
@@ -56,26 +78,27 @@ public static class YLModGUI {
                 (HelpGroup = new SGroup {
                     ScrollDirection = SGroup.EDirection.Vertical,
                     AutoLayout = elem => elem.AutoLayoutVertical,
-                    AutoLayoutPadding = 16f,
+                    AutoLayoutPadding = PaddingColumnElements,
                     OnUpdateStyle = elem => {
                         elem.Position = new Vector2(elem.Previous.Position.x, elem.Previous.Position.y + elem.Previous.Size.y + Padding);
                         elem.Size = new Vector2(512, elem.Parent.Size.y - elem.Position.y - Padding);
                     },
+                    With = { new SGroupForceScrollModifier() },
                     Children = {
                         new SGroup() {
                             Background = new Color(0f, 0f, 0f, 0f),
                             AutoLayout = elem => elem.AutoLayoutVertical,
                             AutoLayoutVerticalStretch = false,
                             AutoLayoutPadding = 0f,
-                            OnUpdateStyle = HelpGroupUpdateStyle,
+                            OnUpdateStyle = SegmentGroupUpdateStyle,
                             Children = {
                                 new SLabel("Debug Log:") {
-                                    Background = Color.white,
-                                    Foreground = Color.black
+                                    Background = YLModGUI.HeaderBackground,
+                                    Foreground = YLModGUI.HeaderForeground
                                 },
                                 new SLabel("Keyboard:") {
-                                    Background = Color.white,
-                                    Foreground = Color.black
+                                    Background = YLModGUI.HeaderBackground,
+                                    Foreground = YLModGUI.HeaderForeground
                                 },
                                 new SLabel("HOME / POS1: Toggle log"),
                                 new SLabel("PAGE UP / DOWN: Scroll")
@@ -87,15 +110,15 @@ public static class YLModGUI {
                             AutoLayout = elem => elem.AutoLayoutVertical,
                             AutoLayoutVerticalStretch = false,
                             AutoLayoutPadding = 0f,
-                            OnUpdateStyle = HelpGroupUpdateStyle,
+                            OnUpdateStyle = SegmentGroupUpdateStyle,
                             Children = {
                                 new SLabel("Miscellaneous:") {
-                                    Background = Color.white,
-                                    Foreground = Color.black
+                                    Background = YLModGUI.HeaderBackground,
+                                    Foreground = YLModGUI.HeaderForeground
                                 },
                                 new SLabel("Keyboard:") {
-                                    Background = Color.white,
-                                    Foreground = Color.black
+                                    Background = YLModGUI.HeaderBackground,
+                                    Foreground = YLModGUI.HeaderForeground
                                 },
                                 new SLabel("F11: Toggle game GUI"),
                             }
@@ -116,7 +139,25 @@ public static class YLModGUI {
                     OnUpdateStyle = elem => {
                         elem.Position = new Vector2(elem.Previous.Position.x, elem.Previous.Position.y + elem.Previous.Size.y + Padding);
                         elem.Size = new Vector2(256, elem.Parent.Size.y - elem.Position.y - Padding);
+                    },
+                    With = { new SGroupForceScrollModifier() }
+                }),
+
+                new SLabel("Settings:") {
+                    OnUpdateStyle = elem => {
+                        elem.Position = new Vector2(elem.Previous.Previous.Position.x + elem.Previous.Size.x + Padding, elem.Previous.Previous.Position.y);
                     }
+                },
+
+                (SettingsGroup = new SGroup {
+                    ScrollDirection = SGroup.EDirection.Vertical,
+                    AutoLayout = elem => elem.AutoLayoutVertical,
+                    AutoLayoutPadding = PaddingColumnElements,
+                    OnUpdateStyle = elem => {
+                        elem.Position = new Vector2(elem.Previous.Position.x, elem.Previous.Position.y + elem.Previous.Size.y + Padding);
+                        elem.Size = new Vector2(256, elem.Parent.Size.y - elem.Position.y - Padding);
+                    },
+                    With = { new SGroupForceScrollModifier() }
                 }),
 
             }
@@ -154,9 +195,22 @@ public static class YLModGUI {
         _ListScenes();
     }
 
-    public static void HelpGroupUpdateStyle(SElement elem) {
+    public static void SegmentGroupUpdateStyle(SElement elem) {
         // elem.Position = elem.Previous.Position + new Vector2(0, elem.Previous.Size.y + elem.Backend.LineHeight * 2);
-        elem.Size = new Vector2(elem.Parent.Size.x, elem.Backend.LineHeight * elem.Children.Count);
+
+        if (!(elem is SGroup))
+            return;
+        SGroup group = (SGroup) elem;
+
+        group.Border = 0;
+
+        float height = 0f;
+        for (int i = 0; i < group.Children.Count; i++) {
+            if (i > 0)
+                height += group.AutoLayoutPadding;
+            height += group.Children[i].Size.y;
+        }
+        elem.Size = new Vector2(elem.Parent.InnerSize.x, height);
     }
 
     public static void Update() {
@@ -281,7 +335,7 @@ public static class YLModGUI {
         for (int i = 0; i < scenes.Length; i++) {
             SceneInfo scene = scenes[i];
             if (string.IsNullOrEmpty(scene.SceneName)) {
-                YLMod.Log($"Found nameless scene info: {i} {scene.HashID} {scene.Scene?.name ?? "null"}");
+                YLMod.Log("main", $"Found nameless scene info: {i} {scene.HashID} {scene.Scene?.name ?? "null"}");
                 continue;
             }
             _AddScene(scene.SceneName);

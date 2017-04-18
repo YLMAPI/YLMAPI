@@ -23,7 +23,7 @@ class patch_TextManager : TextManager {
 
         // This runs before YLMod.EntryPoint
         // TODO: Once the YLMod.EntryPoint runs before TextManager, don't manually invoke YLMod.OnTextLoad on EntryPoint
-        YLMod.OnTextLoad?.Invoke(this, tables, stringData);
+        YLMod.Content.OnTextLoad?.Invoke(this, tables, stringData);
     }
 
 }

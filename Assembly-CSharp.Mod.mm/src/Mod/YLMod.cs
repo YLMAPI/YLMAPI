@@ -9,6 +9,7 @@ using SGUI;
 using Rewired;
 using UEInput = UnityEngine.Input;
 using System.IO;
+using System.Reflection;
 
 public static partial class YLMod {
 
@@ -49,10 +50,10 @@ public static partial class YLMod {
     public static string GameDirectory;
     public static string ModsDirectory;
     public static string TextsDirectory;
+    public static string ContentDirectory;
 
     public static Action OnUpdate;
     public static Action OnLateUpdate;
-    public static Action<TextManager, string[], string[][]> OnTextLoad;
 
     public static void EntryPoint() {
         Console.WriteLine($"Initializing Yooka-Laylee Mod {BaseUIVersion}");
@@ -64,13 +65,18 @@ public static partial class YLMod {
         Directory.CreateDirectory(ModsDirectory);
         TextsDirectory = Path.Combine(ModsDirectory, "texts");
         Directory.CreateDirectory(TextsDirectory);
+        ContentDirectory = Path.Combine(ModsDirectory, "content");
+        Directory.CreateDirectory(ContentDirectory);
+
+        YLMod.Content.Crawl(Assembly.GetExecutingAssembly());
+        YLMod.Content.Crawl(ContentDirectory);
 
         SceneManager.sceneLoaded += OnSceneLoaded;
         SceneManager.sceneUnloaded += OnSceneUnloaded;
 
         OnLateUpdate += Input.LateUpdate;
 
-        OnTextLoad += (tm, tables, stringData) => {
+        YLMod.Content.OnTextLoad += (tm, tables, stringData) => {
             for (int i = 0; i < stringData.Length; i++) {
                 string[] strings = stringData[i];
                 if (strings == null) // Who knows?
@@ -122,21 +128,24 @@ public static partial class YLMod {
     }
 
     public static void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
-        YLMod.Log($"Loaded scene: {scene.name}");
+        YLMod.Log("main", $"Loaded scene: {scene.name}");
         // scene.OnLoadFinished(s => Console.WriteLine(s.DumpHierarchy(new StringBuilder()).ToString()));
     }
 
     public static void OnSceneUnloaded(Scene scene) {
-        YLMod.Log($"Unloaded scene: {scene.name}");
+        YLMod.Log("main", $"Unloaded scene: {scene.name}");
     }
 
-    public static void Log(string str) {
+    public static void Log(string tag, string str) {
+        Console.Write("[");
+        Console.Write(tag);
+        Console.Write("] ");
         Console.WriteLine(str);
 
         if (YLModGUI.Root == null)
             YLModGUI.Init();
         YLModGUI.LogGroup.Children.Add(
-            new SLabel(str) {
+            new SLabel($"[{tag}] {str}") {
                 With = { new SFadeInAnimation() }
             }
         );
