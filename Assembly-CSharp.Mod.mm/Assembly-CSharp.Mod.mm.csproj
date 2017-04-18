@@ -63,6 +63,7 @@
     <Compile Include="src\Common\AssetMetadata.cs" />
     <Compile Include="src\Common\LimitedStream.cs" />
     <Compile Include="src\Mod\ModProfile.cs" />
+    <Compile Include="src\Mod\SGUIExt\SGroupMinimumContentSizeModifier.cs" />
     <Compile Include="src\Mod\SGUIExt\SGroupForceScrollModifier.cs" />
     <Compile Include="src\Mod\SGUIExt\SCheckboxModifier.cs" />
     <Compile Include="src\Mod\YLMod.Content.cs" />
@@ -127,7 +128,7 @@
     <EmbeddedResource Include="Content\ylmod\gui\checkbox_unchecked.png">
       <LogicalName>Content/ylmod/gui/checkbox_unchecked.png</LogicalName>
     </EmbeddedResource>
-	<EmbeddedResource Include="Content\ylmod\scenes.txt">
+    <EmbeddedResource Include="Content\ylmod\scenes.txt">
       <LogicalName>Content/ylmod/scenes.txt</LogicalName>
     </EmbeddedResource>
   </ItemGroup>

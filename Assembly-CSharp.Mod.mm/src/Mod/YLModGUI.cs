@@ -6,11 +6,13 @@ using UnityEngine.UI;
 using SGUI;
 using System.IO;
 using UnityEngine.SceneManagement;
+using System.Reflection;
 
 public static class YLModGUI {
 
     public const float Padding = 2;
     public const float PaddingColumnElements = 32;
+    public const float PaddingHierarchyDepth = 16;
 
     public static readonly Color HeaderBackground = new Color(0.9f, 0.9f, 0.9f, 1f);
     public static readonly Color HeaderForeground = new Color(0.1f, 0.1f, 0.1f, 1f);
@@ -222,7 +224,7 @@ public static class YLModGUI {
                         elem.Position = new Vector2(elem.Previous.Position.x, elem.Previous.Position.y + elem.Previous.Size.y + Padding);
                         elem.Size = new Vector2(256, elem.Parent.Size.y - elem.Position.y - Padding);
                     },
-                    With = { new SGroupForceScrollModifier() }
+                    With = { new SGroupMinimumContentSizeModifier(), new SGroupForceScrollModifier() }
                 }),
 
                 new SLabel("Inspector:") {
@@ -239,7 +241,7 @@ public static class YLModGUI {
                         elem.Position = new Vector2(elem.Previous.Position.x, elem.Previous.Position.y + elem.Previous.Size.y + Padding);
                         elem.Size = new Vector2(256, elem.Parent.Size.y - elem.Position.y - Padding);
                     },
-                    With = { new SGroupForceScrollModifier() }
+                    With = { new SGroupMinimumContentSizeModifier(), new SGroupForceScrollModifier() }
                 }),
 
             }
@@ -275,7 +277,7 @@ public static class YLModGUI {
         };
 
         _ListScenes();
-        RefreshHierarchy();
+        SceneManager.activeSceneChanged += (sceneA, sceneB) => RefreshHierarchy();
     }
 
     public static void SegmentGroupUpdateStyle(SElement elem) {
@@ -394,30 +396,101 @@ public static class YLModGUI {
 
     private static Coroutine _C_RefreshHierarchy;
     public static void RefreshHierarchy() {
-        _C_RefreshHierarchy?.StopGlobal();
-        _C_RefreshHierarchy = _RefreshHierarchy().StartGlobal();
+        _C_RefreshHierarchy = _RefreshHierarchy(_C_RefreshHierarchy).StartGlobal();
     }
-    private static IEnumerator _RefreshHierarchy() {
+    private static IEnumerator _RefreshHierarchy(Coroutine prev) {
+        if (prev != null) {
+            prev.StopGlobal();
+            yield return null;
+        }
+
+        Scene scene = SceneManager.GetActiveScene();
+        while (!scene.isLoaded)
+            yield return null;
+
         HierarchyGroup.Children.Clear();
-        SPreloader preloader = new SPreloader();
-        HierarchyGroup.Children.Add(preloader);
+        SPreloader preloader = new SPreloader() {
+            Parent = HierarchyGroup
+        };
         yield return null;
 
-        GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
-
-        foreach (GameObject root in roots) {
-            while (_AddTransformGroup(HierarchyGroup, root.transform).MoveNext())
-                yield return null;
-        }
+        IEnumerator e = _AddTransformChildrenGroups(null, null);
+        while (e.MoveNext())
+            yield return e.Current;
 
         preloader.Modifiers.Add(new SFadeOutShrinkSequence());
     }
-    private static IEnumerator _AddTransformGroup(SGroup parent, Transform t) {
-        yield return null;
+    private static IEnumerator _AddTransformChildrenGroups(SGroup parent, Transform t) {
+        if (ReferenceEquals(t, null)) {
+            Scene scene = SceneManager.GetActiveScene();
+            GameObject[] roots = scene.GetRootGameObjects();
 
+            foreach (GameObject root in roots) {
+                yield return null;
+                if (root == null)
+                    continue;
+                AddTransformGroup(parent, root.transform);
+            }
+            yield break;
+        }
+
+        if (t == null)
+            yield break;
+
+        for (int i = 0; i < t.childCount; i++) {
+            yield return null;
+            AddTransformGroup(parent, t.GetChild(i));
+        }
+
+        yield return null;
+        HierarchyGroup.UpdateStyle();
+    }
+    public static SGroup AddTransformGroup(SGroup parent, Transform t) {
+        if (t == null)
+            return null;
+
+        bool childrenAdded = false;
         SGroup group = new SGroup() {
-            Parent = parent
+            Parent = parent ?? HierarchyGroup,
+            Border = 0,
+            OnUpdateStyle = elem => {
+                SGroup g = (SGroup) elem;
+                SegmentGroupUpdateStyle(elem);
+                g.ContentSize.y = g.Size.y;
+                if (elem[1].Visible)
+                    return;
+                g.Size.y = g[0].Size.y;
+            },
+            Children = {
+                new SButton(t.name) {
+                    Alignment = TextAnchor.MiddleLeft,
+                    OnClick = elem => {
+                        // Inspect(t);
+                        elem.Next.Visible = !elem.Next.Visible;
+                        HierarchyGroup.UpdateStyle();
+                    }
+                },
+                new SGroup() {
+                    Visible = false,
+                    AutoLayout = elem => elem.AutoLayoutVertical,
+                    AutoLayoutPadding = Padding,
+                    OnUpdateStyle = elem => {
+                        if (elem.Visible && !childrenAdded) {
+                            childrenAdded = true;
+                            _AddTransformChildrenGroups((SGroup) elem, t).StartGlobal();
+                        }
+                        SegmentGroupUpdateStyle(elem);
+                        elem.Position = new Vector2(
+                            PaddingHierarchyDepth,
+                            elem.Previous.Position.y + elem.Previous.Size.y
+                        );
+                        elem.Size.x = elem.Parent.InnerSize.x - PaddingHierarchyDepth;
+                    },
+                }
+            }
         };
+
+        return group;
     }
 
 }

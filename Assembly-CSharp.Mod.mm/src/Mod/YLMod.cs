@@ -55,7 +55,15 @@ public static partial class YLMod {
     public static Action OnUpdate;
     public static Action OnLateUpdate;
 
+    public static bool IsInitialized;
+
+    static YLMod() {
+        EntryPoint();
+    }
     public static void EntryPoint() {
+        if (IsInitialized)
+            return;
+        IsInitialized = true;
         Console.WriteLine($"Initializing Yooka-Laylee Mod {BaseUIVersion}");
 
         GameDirectory = Path.GetDirectoryName(Path.GetFullPath(Application.dataPath));
@@ -89,7 +97,7 @@ public static partial class YLMod {
     }
 
     public static void Log(string tag, string str) {
-        Console.Write("[");
+        Console.Write("[YLMod] [");
         Console.Write(tag);
         Console.Write("] ");
         Console.WriteLine(str);
