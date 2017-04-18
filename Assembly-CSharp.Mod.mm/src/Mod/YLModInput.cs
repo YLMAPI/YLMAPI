@@ -71,10 +71,10 @@ public static partial class YLModInput {
         _InitButtonMap(10, "Fly");
         _InitButtonMap(12, "Context");
         _InitButtonMap(14, "TongueEdibleItem", "B");
-        _InitButtonMap_Not(input => UEInput.GetMouseButton(3), "B");
+        _InitButtonMap_Not(input => UEInput.GetMouseButton(1), "B");
         _InitButtonMap(15, "Invisibility");
         _InitButtonMap(16, "BasicAttack", "ShootEatenItem", "X");
-        _InitButtonMap_Not(input => UEInput.GetMouseButton(1), "X");
+        _InitButtonMap_Not(input => UEInput.GetMouseButton(0), "X");
         _InitButtonMap(18, "WheelSpin");
         _InitButtonMap(19, "FartBubble");
         _InitButtonMap(20, "Crouch", "LT", "L2");

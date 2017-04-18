@@ -509,7 +509,7 @@ public static class YLModGUI {
             return;
 
         new SButton("Refresh") {
-            Parent = HierarchyGroup,
+            Parent = InspectorGroup,
             Icon = YLModContent.Load<Texture2D>("ylmod/gui/refresh"),
             IconScale = new Vector2(0.25f, 0.25f),
             Alignment = TextAnchor.MiddleLeft,
