@@ -66,7 +66,7 @@
     <Compile Include="src\Mod\SGUIExt\SGroupForceScrollModifier.cs" />
     <Compile Include="src\Mod\SGUIExt\SCheckboxModifier.cs" />
     <Compile Include="src\Mod\YLMod.Content.cs" />
-    <Compile Include="src\Mod\YLMod.Input.cs" />
+    <Compile Include="src\Mod\YLModInput.cs" />
     <Compile Include="src\Mod\YLModMenuExt.cs" />
     <Compile Include="src\Patch\InputStickXZ.cs" />
     <Compile Include="src\Patch\FrontendMainScreenController.cs" />
@@ -120,13 +120,15 @@
     <Compile Include="..\SGUI\src\SGUIRoot.cs" />
     <Compile Include="..\SGUI\src\SModifier.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="Content\ylmod\gui\checkbox_checked.png">
       <LogicalName>Content/ylmod/gui/checkbox_checked.png</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Content\ylmod\gui\checkbox_unchecked.png">
       <LogicalName>Content/ylmod/gui/checkbox_unchecked.png</LogicalName>
+    </EmbeddedResource>
+	<EmbeddedResource Include="Content\ylmod\scenes.txt">
+      <LogicalName>Content/ylmod/scenes.txt</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

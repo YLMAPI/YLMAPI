@@ -45,7 +45,7 @@ public class SimpleSmoothMouseLook : MonoBehaviour {
         var targetCharacterOrientation = Quaternion.Euler(targetCharacterDirection);
 
         // Get raw mouse input for a cleaner reading on more sensitive mice.
-        var mouseDelta = new Vector2(YLMod.Input.GetAxisRaw("Mouse X"), YLMod.Input.GetAxisRaw("Mouse Y"));
+        var mouseDelta = new Vector2(YLModInput.GetAxisRaw("Mouse X"), YLModInput.GetAxisRaw("Mouse Y"));
 
         // Scale input against the sensitivity setting and multiply that against the smoothing value.
         mouseDelta = Vector2.Scale(mouseDelta, new Vector2(sensitivity.x * smoothing.x, sensitivity.y * smoothing.y));

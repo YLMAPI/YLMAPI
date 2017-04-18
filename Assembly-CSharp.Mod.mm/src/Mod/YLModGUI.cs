@@ -27,8 +27,11 @@ public static class YLModGUI {
 
     public static SGroup MainGroup;
     public static SGroup HelpGroup;
-    public static SGroup ScenesGroup;
     public static SGroup SettingsGroup;
+
+    public static SGroup ScenesGroup;
+    public static SGroup HierarchyGroup;
+    public static SGroup InspectorGroup;
 
     private readonly static HashSet<Canvas> _HiddenCanvases = new HashSet<Canvas>();
 
@@ -43,6 +46,7 @@ public static class YLModGUI {
 
 
         Root = SGUIRoot.Setup();
+        GameObject.Find("SGUI Root").tag = "DoNotPause";
 
         Root.Background = new Color(
             /*
@@ -126,6 +130,67 @@ public static class YLModGUI {
                     }
                 }),
 
+                new SLabel("Settings:") {
+                    OnUpdateStyle = elem => {
+                        elem.Position = new Vector2(elem.Previous.Previous.Position.x + elem.Previous.Size.x + Padding, elem.Previous.Previous.Position.y);
+                    }
+                },
+
+                (SettingsGroup = new SGroup {
+                    ScrollDirection = SGroup.EDirection.Vertical,
+                    AutoLayout = elem => elem.AutoLayoutVertical,
+                    AutoLayoutPadding = PaddingColumnElements,
+                    OnUpdateStyle = elem => {
+                        elem.Position = new Vector2(elem.Previous.Position.x, elem.Previous.Position.y + elem.Previous.Size.y + Padding);
+                        elem.Size = new Vector2(256, elem.Parent.Size.y - elem.Position.y - Padding);
+                    },
+                    With = { new SGroupForceScrollModifier() },
+                    Children = {
+
+                        new SGroup() {
+                            Background = new Color(0f, 0f, 0f, 0f),
+                            AutoLayout = elem => elem.AutoLayoutVertical,
+                            OnUpdateStyle = YLModGUI.SegmentGroupUpdateStyle,
+                            Children = {
+                                new SLabel("General:") {
+                                    Background = YLModGUI.HeaderBackground,
+                                    Foreground = YLModGUI.HeaderForeground
+                                },
+
+                                new SButton("Show Game GUI") {
+                                    Alignment = TextAnchor.MiddleLeft,
+                                    With = { new SCheckboxModifier() {
+                                        GetValue = b => IsGameHUDVisible,
+                                        SetValue = (b, v) => {
+                                            if (v)
+                                                ShowGameGUI();
+                                            else
+                                                HideGameGUI();
+                                        }
+                                    }}
+                                },
+
+                                new SButton("Show Mod Log") {
+                                    Alignment = TextAnchor.MiddleLeft,
+                                    With = { new SCheckboxModifier() {
+                                        GetValue = b => LogGroup?.Visible ?? false,
+                                        SetValue = (b, v) => LogGroup.Visible = v
+                                    }}
+                                },
+
+                                new SButton("Fullscreen Log") {
+                                    Alignment = TextAnchor.MiddleLeft,
+                                    With = { new SCheckboxModifier() {
+                                        GetValue = b => IsLogBig,
+                                        SetValue = (b, v) => { IsLogBig = v; LogGroup?.UpdateStyle(); }
+                                    }}
+                                }
+                            }
+                        }
+
+                    }
+                }),
+
                 new SLabel("Scenes:") {
                     OnUpdateStyle = elem => {
                         elem.Position = new Vector2(elem.Previous.Previous.Position.x + elem.Previous.Size.x + Padding, elem.Previous.Previous.Position.y);
@@ -143,16 +208,33 @@ public static class YLModGUI {
                     With = { new SGroupForceScrollModifier() }
                 }),
 
-                new SLabel("Settings:") {
+                new SLabel("Hierarchy:") {
                     OnUpdateStyle = elem => {
                         elem.Position = new Vector2(elem.Previous.Previous.Position.x + elem.Previous.Size.x + Padding, elem.Previous.Previous.Position.y);
                     }
                 },
 
-                (SettingsGroup = new SGroup {
+                (HierarchyGroup = new SGroup {
                     ScrollDirection = SGroup.EDirection.Vertical,
                     AutoLayout = elem => elem.AutoLayoutVertical,
-                    AutoLayoutPadding = PaddingColumnElements,
+                    AutoLayoutPadding = Padding,
+                    OnUpdateStyle = elem => {
+                        elem.Position = new Vector2(elem.Previous.Position.x, elem.Previous.Position.y + elem.Previous.Size.y + Padding);
+                        elem.Size = new Vector2(256, elem.Parent.Size.y - elem.Position.y - Padding);
+                    },
+                    With = { new SGroupForceScrollModifier() }
+                }),
+
+                new SLabel("Inspector:") {
+                    OnUpdateStyle = elem => {
+                        elem.Position = new Vector2(elem.Previous.Previous.Position.x + elem.Previous.Size.x + Padding, elem.Previous.Previous.Position.y);
+                    }
+                },
+
+                (InspectorGroup = new SGroup {
+                    ScrollDirection = SGroup.EDirection.Vertical,
+                    AutoLayout = elem => elem.AutoLayoutVertical,
+                    AutoLayoutPadding = Padding,
                     OnUpdateStyle = elem => {
                         elem.Position = new Vector2(elem.Previous.Position.x, elem.Previous.Position.y + elem.Previous.Size.y + Padding);
                         elem.Size = new Vector2(256, elem.Parent.Size.y - elem.Position.y - Padding);
@@ -193,6 +275,7 @@ public static class YLModGUI {
         };
 
         _ListScenes();
+        RefreshHierarchy();
     }
 
     public static void SegmentGroupUpdateStyle(SElement elem) {
@@ -263,70 +346,26 @@ public static class YLModGUI {
             ToggleGameGUI();
     }
 
-    private static void _AddScene(string scene) {
-        ScenesGroup.Children.Add(new SButton(scene) {
+    public static SButton AddScene(string scene) {
+        SButton button = new SButton(scene) {
             Alignment = TextAnchor.MiddleLeft,
-            OnClick = button => {
+            With = { new SFadeInAnimation() },
+            OnClick = b => {
                 LoadingScreenController.LoadScene(scene, "", "");
             }
-        });
+        };
+        ScenesGroup.Children.Add(button);
+        return button;
     }
-    private static IEnumerator _AddScenes(params string[] scenes) {
-        for (int i = 0; i < scenes.Length; i++) {
-            _AddScene(scenes[i]);
-            yield return null;
-        }
-    }
-    private static void _ListScenes() {
-        /*
-        _AddScene("Frontend_Menu");
-        _AddScene("Arcade_Frontend");
-        _AddScene("Arcade_Frontend_Standalone");
-
-        YLModBehaviour.instance.StartCoroutine(_ListMainScenes());
-        YLModBehaviour.instance.StartCoroutine(_ListArcadeScenes());
-        */
-
-        YLModBehaviour.instance.StartCoroutine(_AddScenes(
-            "Frontend_Menu",
-            "Arcade_Frontend",
-            "Arcade_Frontend_Standalone",
-            "Level_01_Jungle",
-            "Level_02_Glacier",
-            "Level_03_Swamp",
-            "Level_01_Jungle_Expanded",
-            "Level_02_Glacier_Expanded",
-            "Level_00_Hub_A",
-            "Level_00_Hub_B",
-            "Level_00_Hub_C",
-            "Level_04_Casino",
-            "Level_05_Space",
-            "Quiz_01_Jungle",
-            "Quiz_02_GlacierSwamp",
-            "Quiz_03_CasinoSpace",
-            "Arcade_Bees",
-            "Arcade_Brawl",
-            "Level_07_FinalBoss",
-            "Level_05_Space_Expanded",
-            "Level_03_Swamp_Expanded",
-            "Level_04_Casino_Expanded",
-            "Arcade_Brawl",
-            "Arcade_Brawl_Standalone",
-            "Arcade_Karts",
-            "Arcade_Karts_Standalone",
-            "Arcade_Bees",
-            "Arcade_Bees_Standalone",
-            "Arcade_Temple",
-            "Arcade_Temple_Standalone",
-            "Arcade_Shooter",
-            "Arcade_Shooter_Standalone",
-            "Arcade_Hurdles",
-            "Arcade_Hurdles_Standalone",
-            "Arcade_Flappy",
-            "Arcade_Flappy_Standalone",
-            "Arcade_Maze",
-            "Arcade_Maze_Standalone"
-        ));
+    private static IEnumerator _ListScenes() {
+        using (StreamReader reader = new StreamReader(YLModContent.GetMapped("ylmod/gui/scenes").Stream))
+            while (!reader.EndOfStream) {
+                string line = reader.ReadLine().Trim();
+                if (line.Length == 0)
+                    continue;
+                AddScene(line);
+                yield return null;
+            }
     }
     private static IEnumerator _ListMainScenes() {
         SceneInfo[] scenes;
@@ -338,7 +377,7 @@ public static class YLModGUI {
                 YLMod.Log("main", $"Found nameless scene info: {i} {scene.HashID} {scene.Scene?.name ?? "null"}");
                 continue;
             }
-            _AddScene(scene.SceneName);
+            AddScene(scene.SceneName);
             yield return null;
         }
     }
@@ -347,10 +386,38 @@ public static class YLModGUI {
         while ((arcadeGames = ArcadeGamesManager.instance?.arcadeGamesSetup?.data) == null)
             yield return null;
         for (int i = 0; i < arcadeGames.Length; i++) {
-            _AddScene(arcadeGames[i].sceneName);
-            _AddScene(arcadeGames[i].sceneName + "_Standalone");
+            AddScene(arcadeGames[i].sceneName);
+            AddScene(arcadeGames[i].sceneName + "_Standalone");
             yield return null;
         }
+    }
+
+    private static Coroutine _C_RefreshHierarchy;
+    public static void RefreshHierarchy() {
+        _C_RefreshHierarchy?.StopGlobal();
+        _C_RefreshHierarchy = _RefreshHierarchy().StartGlobal();
+    }
+    private static IEnumerator _RefreshHierarchy() {
+        HierarchyGroup.Children.Clear();
+        SPreloader preloader = new SPreloader();
+        HierarchyGroup.Children.Add(preloader);
+        yield return null;
+
+        GameObject[] roots = SceneManager.GetActiveScene().GetRootGameObjects();
+
+        foreach (GameObject root in roots) {
+            while (_AddTransformGroup(HierarchyGroup, root.transform).MoveNext())
+                yield return null;
+        }
+
+        preloader.Modifiers.Add(new SFadeOutShrinkSequence());
+    }
+    private static IEnumerator _AddTransformGroup(SGroup parent, Transform t) {
+        yield return null;
+
+        SGroup group = new SGroup() {
+            Parent = parent
+        };
     }
 
 }

@@ -196,7 +196,7 @@ public static class YLModFreeCamera {
                     }}
                 },
 
-                new SButton("Use Neutral Lighting") {
+                new SButton("Neutral Ambient Lighting") {
                     Alignment = TextAnchor.MiddleLeft,
                     With = { new SCheckboxModifier() {
                         GetValue = b => IsFullBright,
@@ -233,54 +233,54 @@ public static class YLModFreeCamera {
             }
         };
 
-        YLMod.Input.ButtonMap["FreeCam Toggle"] =
-            input => Input.GetKey(KeyCode.F12) || (YLMod.Input.GetButton("LS") && YLMod.Input.GetButton("RS"));
-        YLMod.Input.ButtonMap["FreeCam GUI Toggle"] =
-            input => Input.GetKey(KeyCode.F3) || YLMod.Input.GetButton("B");
-        YLMod.Input.ButtonMap["FreeCam Game GUI Toggle Ext"] =
-            input => YLMod.Input.GetButton("X");
+        YLModInput.ButtonMap["FreeCam Toggle"] =
+            input => Input.GetKey(KeyCode.F12) || (YLModInput.GetButton("LS") && YLModInput.GetButton("RS"));
+        YLModInput.ButtonMap["FreeCam GUI Toggle"] =
+            input => Input.GetKey(KeyCode.F3) || YLModInput.GetButton("B");
+        YLModInput.ButtonMap["FreeCam Game GUI Toggle Ext"] =
+            input => YLModInput.GetButton("X");
 
-        YLMod.Input.ButtonMap["FreeCam Light Toggle"] =
-            input => Input.GetKey(KeyCode.F4) || YLMod.Input.GetButton("Y");
+        YLModInput.ButtonMap["FreeCam Light Toggle"] =
+            input => Input.GetKey(KeyCode.F4) || YLModInput.GetButton("Y");
 
-        YLMod.Input.ButtonMap["FreeCam Run"] =
+        YLModInput.ButtonMap["FreeCam Run"] =
             input => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
-        YLMod.Input.ButtonMap["FreeCam Internal Speed Switch"] =
+        YLModInput.ButtonMap["FreeCam Internal Speed Switch"] =
             input => Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
 
-        YLMod.Input.ButtonMap["FreeCam Internal Speed Reset"] =
-            input => Input.GetMouseButton(2) || (YLMod.Input.GetButton("LT") && YLMod.Input.GetButton("RT"));
-        YLMod.Input.ButtonMap["FreeCam Move Speed Reset"] =
+        YLModInput.ButtonMap["FreeCam Internal Speed Reset"] =
+            input => Input.GetMouseButton(2) || (YLModInput.GetButton("LT") && YLModInput.GetButton("RT"));
+        YLModInput.ButtonMap["FreeCam Move Speed Reset"] =
             input =>
                 Input.GetKey(KeyCode.Alpha3) ||
-                (!YLMod.Input.GetButton("FreeCam Internal Speed Switch") && YLMod.Input.GetButton("FreeCam Internal Speed Reset"));
-        YLMod.Input.ButtonMap["FreeCam Game Speed Reset"] =
+                (!YLModInput.GetButton("FreeCam Internal Speed Switch") && YLModInput.GetButton("FreeCam Internal Speed Reset"));
+        YLModInput.ButtonMap["FreeCam Game Speed Reset"] =
             input =>
-                Input.GetKey(KeyCode.Alpha6) || YLMod.Input.GetButton("DPadRight") ||
-                (YLMod.Input.GetButton("FreeCam Internal Speed Switch") && YLMod.Input.GetButton("FreeCam Internal Speed Reset"));
-        YLMod.Input.ButtonMap["FreeCam Game Speed Freeze"] =
-            input => Input.GetKey(KeyCode.Alpha7) || YLMod.Input.GetButton("DPadLeft");
+                Input.GetKey(KeyCode.Alpha6) || YLModInput.GetButton("DPadRight") ||
+                (YLModInput.GetButton("FreeCam Internal Speed Switch") && YLModInput.GetButton("FreeCam Internal Speed Reset"));
+        YLModInput.ButtonMap["FreeCam Game Speed Freeze"] =
+            input => Input.GetKey(KeyCode.Alpha7) || YLModInput.GetButton("DPadLeft");
 
-        YLMod.Input.AxisMap["FreeCam Y Movement"] =
+        YLModInput.AxisMap["FreeCam Y Movement"] =
             input =>
-                Input.GetKey(KeyCode.F) || Input.GetKey(KeyCode.Q) || YLMod.Input.GetButton("LB") ? -1f :
-                Input.GetKey(KeyCode.R) || Input.GetKey(KeyCode.E) || YLMod.Input.GetButton("RB") ?  1f :
+                Input.GetKey(KeyCode.F) || Input.GetKey(KeyCode.Q) || YLModInput.GetButton("LB") ? -1f :
+                Input.GetKey(KeyCode.R) || Input.GetKey(KeyCode.E) || YLModInput.GetButton("RB") ?  1f :
                 0f;
 
-        YLMod.Input.AxisMap["FreeCam Internal Speed"] =
+        YLModInput.AxisMap["FreeCam Internal Speed"] =
             input =>
                 Input.mouseScrollDelta.y +
-                (YLMod.Input.GetButton("LT") ? -0.4f : YLMod.Input.GetButton("RT") ? 0.4f : 0f);
-        YLMod.Input.AxisMap["FreeCam Move Speed"] =
+                (YLModInput.GetButton("LT") ? -0.4f : YLModInput.GetButton("RT") ? 0.4f : 0f);
+        YLModInput.AxisMap["FreeCam Move Speed"] =
             input =>
                 (Input.GetKey(KeyCode.Alpha1) ? -0.4f : Input.GetKey(KeyCode.Alpha2) ? 0.4f : 0f) +
-                (!YLMod.Input.GetButton("FreeCam Internal Speed Switch") ? YLMod.Input.GetAxis("FreeCam Internal Speed") : 0f);
-        YLMod.Input.AxisMap["FreeCam Game Speed"] =
+                (!YLModInput.GetButton("FreeCam Internal Speed Switch") ? YLModInput.GetAxis("FreeCam Internal Speed") : 0f);
+        YLModInput.AxisMap["FreeCam Game Speed"] =
             input =>
-                (YLMod.Input.GetButton("DPadUp") ? 0.4f : YLMod.Input.GetButton("DPadDown") ? -0.4f : 0f) +
+                (YLModInput.GetButton("DPadUp") ? 0.4f : YLModInput.GetButton("DPadDown") ? -0.4f : 0f) +
                 (Input.GetKey(KeyCode.Alpha4) ? -0.4f : Input.GetKey(KeyCode.Alpha5) ? 0.4f : 0f) +
-                ( YLMod.Input.GetButton("FreeCam Internal Speed Switch") ? YLMod.Input.GetAxis("FreeCam Internal Speed") : 0f);
+                ( YLModInput.GetButton("FreeCam Internal Speed Switch") ? YLModInput.GetAxis("FreeCam Internal Speed") : 0f);
 
         SceneManager.activeSceneChanged += (sceneA, sceneB) => {
             WasFullBright = IsFullBright = false;
@@ -290,7 +290,7 @@ public static class YLModFreeCamera {
     }
 
     public static void Update() {
-        if (YLMod.Input.GetButtonDown("FreeCam Toggle")) {
+        if (YLModInput.GetButtonDown("FreeCam Toggle")) {
             IsEnabled = !IsEnabled;
 
             if (!IsEnabled) {
@@ -323,6 +323,16 @@ public static class YLModFreeCamera {
             YLMod.Log("freecam", $"{(IsEnabled ? "Enabled" : "Disabled")} MAGIC CAMERA™ mode.");
         }
 
+        if (IsEnabled && YLModInput.GetButtonDown("FreeCam Light Toggle"))
+            IsFullBright = !IsFullBright;
+        if (!WasFullBright && IsFullBright) {
+            OriginalAmbienceColor = RenderSettings.ambientLight;
+            RenderSettings.ambientLight = new Color(1f, 1f, 1f, 1f);
+        } else if (WasFullBright && !IsFullBright) {
+            RenderSettings.ambientLight = OriginalAmbienceColor;
+        }
+        WasFullBright = IsFullBright;
+
         if (CameraManager.Instance != null) {
             CameraManager.Instance.enabled = !IsEnabled;
         }
@@ -332,20 +342,10 @@ public static class YLModFreeCamera {
         if (!IsEnabled)
             return;
 
-        if (YLMod.Input.GetButtonDown("FreeCam GUI Toggle"))
+        if (YLModInput.GetButtonDown("FreeCam GUI Toggle"))
             IsGUIVisible = !IsGUIVisible;
-        if (YLMod.Input.GetButtonDown("FreeCam Game GUI Toggle Ext"))
+        if (YLModInput.GetButtonDown("FreeCam Game GUI Toggle Ext"))
             YLModGUI.ToggleGameGUI();
-        if (YLMod.Input.GetButtonDown("FreeCam Light Toggle"))
-            IsFullBright = !IsFullBright;
-
-        if (!WasFullBright && IsFullBright) {
-            OriginalAmbienceColor = RenderSettings.ambientLight;
-            RenderSettings.ambientLight = new Color(1f, 1f, 1f, 1f);
-        } else if (WasFullBright && !IsFullBright) {
-            RenderSettings.ambientLight = OriginalAmbienceColor;
-        }
-        WasFullBright = IsFullBright;
 
         /*
         if (CameraManager.Instance != null) {
@@ -359,33 +359,33 @@ public static class YLModFreeCamera {
 
         Transform camt = FreeCamera.transform;
 
-        Speed = Mathf.Max(0.01f, Speed + 0.01f * YLMod.Input.GetAxis("FreeCam Move Speed"));
-        if (YLMod.Input.GetButton("FreeCam Move Speed Reset"))
+        Speed = Mathf.Max(0.01f, Speed + 0.01f * YLModInput.GetAxis("FreeCam Move Speed"));
+        if (YLModInput.GetButton("FreeCam Move Speed Reset"))
             Speed = DefaultSpeed;
 
         float speed = Speed;
-        if (YLMod.Input.GetButton("FreeCam Run"))
+        if (YLModInput.GetButton("FreeCam Run"))
             speed *= 4f;
 
         Vector3 dir = Vector3.zero;
 
-        dir += camt.forward * YLMod.Input.GetAxis("Vertical");
+        dir += camt.forward * YLModInput.GetAxis("Vertical");
 
         float angleY = camt.rotation.eulerAngles.y;
         angleY = (angleY + 90f) / 180f * Mathf.PI;
         if (camt.rotation.eulerAngles.z == 180f)
             angleY += Mathf.PI;
-        dir += new Vector3(Mathf.Sin(angleY), 0f, Mathf.Cos(angleY)) * YLMod.Input.GetAxis("Horizontal");
+        dir += new Vector3(Mathf.Sin(angleY), 0f, Mathf.Cos(angleY)) * YLModInput.GetAxis("Horizontal");
 
         if (dir != Vector3.zero) {
             dir.Normalize();
             camt.position += dir * speed * SpeedF;
         }
 
-        camt.position += Vector3.up * YLMod.Input.GetAxis("FreeCam Y Movement") * speed * SpeedF;
+        camt.position += Vector3.up * YLModInput.GetAxis("FreeCam Y Movement") * speed * SpeedF;
 
         float timeScalePrev = Time.timeScale;
-        Time.timeScale = Mathf.Clamp(Time.timeScale + YLMod.Input.GetAxis("FreeCam Game Speed") * (
+        Time.timeScale = Mathf.Clamp(Time.timeScale + YLModInput.GetAxis("FreeCam Game Speed") * (
             Time.timeScale < 0.24999f ? 0.01f :
             Time.timeScale < 1.99999f ? 0.05f :
             Time.timeScale < 7.99999f ? 0.5f :
@@ -393,10 +393,10 @@ public static class YLModFreeCamera {
             4f
         ), 0f, 100f);
 
-        if (YLMod.Input.GetButton("FreeCam Game Speed Reset"))
+        if (YLModInput.GetButton("FreeCam Game Speed Reset"))
             Time.timeScale = 1f;
 
-        if (YLMod.Input.GetButton("FreeCam Game Speed Freeze"))
+        if (YLModInput.GetButton("FreeCam Game Speed Freeze"))
             Time.timeScale = 0f;
 
         int scaleRound = Mathf.FloorToInt(Time.timeScale * 100f);

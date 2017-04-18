@@ -5,14 +5,9 @@ using UnityEngine;
 namespace SGUI {
     public class SCheckboxModifier : SModifier {
 
-        public static Texture2D DefaultChecked = YLMod.Content.Load<Texture2D>("ylmod/gui/checkbox_checked");
-        public static Texture2D DefaultUnchecked = YLMod.Content.Load<Texture2D>("ylmod/gui/checkbox_unchecked");
+        public static Texture2D DefaultChecked;
+        public static Texture2D DefaultUnchecked;
         public static Vector2 DefaultScale = new Vector2(0.25f, 0.25f);
-
-        static SCheckboxModifier() {
-            DefaultChecked.filterMode = FilterMode.Trilinear;
-            DefaultUnchecked.filterMode = FilterMode.Trilinear;
-        }
 
         public Texture2D Checked;
         public Texture2D Unchecked;
@@ -23,6 +18,19 @@ namespace SGUI {
         public Action<SButton, bool> SetValue;
 
         public override void Init() {
+            if (DefaultChecked == null) {
+                DefaultChecked = YLModContent.Load<Texture2D>("ylmod/gui/checkbox_checked");
+                if (DefaultChecked != null) {
+                    DefaultChecked.filterMode = FilterMode.Trilinear;
+                }
+            }
+            if (DefaultUnchecked == null) {
+                DefaultUnchecked = YLModContent.Load<Texture2D>("ylmod/gui/checkbox_unchecked");
+                if (DefaultUnchecked != null) {
+                    DefaultUnchecked.filterMode = FilterMode.Trilinear;
+                }
+            }
+
             SButton button = (SButton) Elem;
             button.OnClick += elem => SetValue?.Invoke(button, Value = !Value);
             if (Scale != null)
@@ -34,9 +42,9 @@ namespace SGUI {
             bool value = GetValue?.Invoke(button) ?? Value;
             Value = value;
             if (value)
-                button.Icon = Checked ?? DefaultUnchecked;
+                button.Icon = Checked ?? DefaultChecked;
             else
-                button.Icon = Unchecked ?? DefaultChecked;
+                button.Icon = Unchecked ?? DefaultUnchecked;
         }
 
     }

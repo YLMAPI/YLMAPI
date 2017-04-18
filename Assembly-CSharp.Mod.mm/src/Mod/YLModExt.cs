@@ -67,7 +67,12 @@ public static class YLModExt {
         return c;
     }
 
+    public static Coroutine StartGlobal(this IEnumerator e)
+        => YLModBehaviour.instance.StartCoroutine(e);
+    public static void StopGlobal(this Coroutine c)
+        => YLModBehaviour.instance.StopCoroutine(c);
+
     public static Coroutine OnLoadFinished(this Scene scene, Action<Scene> a)
-        => YLModBehaviour.instance.StartCoroutine(new WaitForSceneLoadFinish(scene, a));
+        => new WaitForSceneLoadFinish(scene, a).StartGlobal();
 
 }

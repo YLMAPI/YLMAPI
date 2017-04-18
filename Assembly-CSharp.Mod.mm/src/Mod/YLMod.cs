@@ -57,7 +57,6 @@ public static partial class YLMod {
 
     public static void EntryPoint() {
         Console.WriteLine($"Initializing Yooka-Laylee Mod {BaseUIVersion}");
-        YLModBehaviour ylmb = YLModBehaviour.instance;
 
         GameDirectory = Path.GetDirectoryName(Path.GetFullPath(Application.dataPath));
         Console.WriteLine($"Game directory: {GameDirectory}");
@@ -68,59 +67,12 @@ public static partial class YLMod {
         ContentDirectory = Path.Combine(ModsDirectory, "content");
         Directory.CreateDirectory(ContentDirectory);
 
-        YLMod.Content.Crawl(Assembly.GetExecutingAssembly());
-        YLMod.Content.Crawl(ContentDirectory);
-
         SceneManager.sceneLoaded += OnSceneLoaded;
         SceneManager.sceneUnloaded += OnSceneUnloaded;
 
-        OnLateUpdate += Input.LateUpdate;
+        OnLateUpdate += YLModInput.LateUpdate;
 
-        YLMod.Content.OnTextLoad += (tm, tables, stringData) => {
-            for (int i = 0; i < stringData.Length; i++) {
-                string[] strings = stringData[i];
-                if (strings == null) // Who knows?
-                    continue;
-                string key = tables[i] ?? $"texts_{i}";
-
-                string file = Path.Combine(YLMod.TextsDirectory, tm.GetLocale());
-                Directory.CreateDirectory(file);
-                file = Path.Combine(file, key + ".txt");
-                if (!File.Exists(file)) {
-                    using (StreamWriter writer = new StreamWriter(file))
-                        for (int j = 0; j < strings.Length; j++)
-                            writer.WriteLine($"{j}: {strings[j]}");
-                } else {
-                    int index = -1;
-                    string text = "";
-                    using (StreamReader reader = new StreamReader(file))
-                        while (!reader.EndOfStream) {
-                            string line = reader.ReadLine();
-                            if (line.StartsWith("#"))
-                                continue;
-                            int indexOfColon = line.IndexOf(':');
-                            if (indexOfColon <= 0) {
-                                text += "\n" + line;
-                                continue;
-                            }
-                            int indexOld = index;
-                            if (!int.TryParse(line.Substring(0, indexOfColon), out index)) {
-                                index = -1;
-                                text += "\n" + line;
-                                continue;
-                            }
-                            if (indexOld != -1)
-                                strings[indexOld] = text;
-                            if (indexOfColon + 2 > line.Length)
-                                text = "";
-                            else
-                                text = line.Substring(indexOfColon + 2);
-                        }
-                    if (index != -1)
-                        strings[index] = text;
-                }
-            }
-        };
+        YLModBehaviour ylmb = YLModBehaviour.instance;
 
         YLModGUI.Init();
 
