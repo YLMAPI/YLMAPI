@@ -3,6 +3,7 @@
 using MonoMod;
 using System.IO;
 using UnityEngine;
+using YLMAPI;
 
 class patch_TextManager : TextManager {
 
@@ -16,14 +17,20 @@ class patch_TextManager : TextManager {
     private extern string GetLocale();
     public string INTERNAL_GetLocale() => GetLocale();
 
+    private extern void orig_Awake();
+    private void Awake() {
+        // TODO: Find an even earlier entry point that isn't UnityEngine.ClassLibraryInitializer::Init
+        ModAPI.EntryPoint();
+
+        orig_Awake();
+    }
+
     public extern void orig_LoadTables();
     // new as we're hiding TextManager's LoadTables.
     public new void LoadTables() {
         orig_LoadTables();
 
-        // This runs before YLMod.EntryPoint
-        // TODO: Once the YLMod.EntryPoint runs before TextManager, don't manually invoke YLMod.OnTextLoad on EntryPoint
-        YLModContent.OnTextLoad?.Invoke(this, tables, stringData);
+        ModEvents.TextsLoaded(this, tables, stringData);
     }
 
 }

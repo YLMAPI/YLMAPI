@@ -5,7 +5,7 @@ using System;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public static class YLModMenuExt {
+public static class YLMAPIMenuExt {
 
     private static UiMenuItemController _BaseButton;
     public static UiMenuItemController BaseButton {

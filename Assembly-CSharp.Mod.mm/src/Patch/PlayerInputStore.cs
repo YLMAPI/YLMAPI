@@ -1,23 +1,20 @@
 ﻿#pragma warning disable CS0626 // Method, operator, or accessor is marked external and has no attributes on it
 
+using Rewired;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 using MonoMod;
+using YLMAPI;
 
-class patch_CameraManager : CameraManager {
+class patch_PlayerInputStore : PlayerInputStore {
 
-    // There's no orig Awake / Start
-
-    private void Start() {
-        
-    }
-
-    public extern void orig_Update();
-    public void Update() {
-        orig_Update();
+    public extern void orig_MyUpdate();
+    public new void MyUpdate() {
+        if (ModEvents.PlayerInputUpdate(this))
+            orig_MyUpdate();
     }
 
 }

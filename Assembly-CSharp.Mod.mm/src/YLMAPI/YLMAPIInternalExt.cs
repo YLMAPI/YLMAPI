@@ -3,7 +3,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-static class YLModInternalExt {
+static class YLMAPIInternalExt {
 
     public static string GetPath(this Transform t) {
         string path = t.name;

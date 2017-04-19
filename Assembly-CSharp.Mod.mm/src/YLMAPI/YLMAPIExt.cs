@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using YLMAPI;
 
-public static class YLModExt {
+public static class YLMAPIExt {
 
     public static T GetRandomElement<T>(this T[] c) {
         return c[UnityEngine.Random.Range(0, c.Length)];
@@ -68,9 +69,9 @@ public static class YLModExt {
     }
 
     public static Coroutine StartGlobal(this IEnumerator e)
-        => YLModBehaviour.instance.StartCoroutine(e);
+        => ModAPIBehaviour.instance.StartCoroutine(e);
     public static void StopGlobal(this Coroutine c)
-        => YLModBehaviour.instance.StopCoroutine(c);
+        => ModAPIBehaviour.instance.StopCoroutine(c);
 
     public static Coroutine OnLoadFinished(this Scene scene, Action<Scene> a)
         => new WaitForSceneLoadFinish(scene, a).StartGlobal();

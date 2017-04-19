@@ -25,7 +25,7 @@ class patch_FrontendMainScreenController : FrontendMainScreenController {
 
         // Console.WriteLine(transform.DumpHierarchy(new StringBuilder()).ToString());
 
-        YLModMenuExt.BaseButton = transform.GetComponentInChildren<UiMenuItemController>();
+        YLMAPIMenuExt.BaseButton = transform.GetComponentInChildren<UiMenuItemController>();
 
     }
 

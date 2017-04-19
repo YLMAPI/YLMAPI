@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using UnityEngine;
+using YLMAPI;
 
 namespace SGUI {
     public class SCheckboxModifier : SModifier {
@@ -19,13 +20,13 @@ namespace SGUI {
 
         public override void Init() {
             if (DefaultChecked == null) {
-                DefaultChecked = YLModContent.Load<Texture2D>("ylmod/gui/checkbox_checked");
+                DefaultChecked = ModContent.Load<Texture2D>("ylmod/gui/checkbox_checked");
                 if (DefaultChecked != null) {
                     DefaultChecked.filterMode = FilterMode.Trilinear;
                 }
             }
             if (DefaultUnchecked == null) {
-                DefaultUnchecked = YLModContent.Load<Texture2D>("ylmod/gui/checkbox_unchecked");
+                DefaultUnchecked = ModContent.Load<Texture2D>("ylmod/gui/checkbox_unchecked");
                 if (DefaultUnchecked != null) {
                     DefaultUnchecked.filterMode = FilterMode.Trilinear;
                 }
