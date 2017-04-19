@@ -289,6 +289,8 @@ public static class YLModFreeCamera {
         };
 
         ModEvents.OnUpdate += Update;
+        // Only make the game use the player input when the free cam is disabled.
+        ModEvents.OnPlayerInputUpdate += input => !IsEnabled;
     }
 
     public static void Update() {
