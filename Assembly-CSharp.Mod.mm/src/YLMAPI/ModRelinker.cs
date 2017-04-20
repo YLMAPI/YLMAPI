@@ -21,6 +21,8 @@ using Mono.Cecil;
 namespace YLMAPI {
     public static class ModRelinker {
 
+        public static string ManagedDirectory = Path.GetDirectoryName(typeof(ModRelinker).Assembly.Location);
+
         public static string GameChecksum;
 
         public static Dictionary<string, ModuleDefinition> AssemblyRelinkedCache = new Dictionary<string, ModuleDefinition>() {
@@ -35,7 +37,7 @@ namespace YLMAPI {
                     return _AssemblyRelinkMap;
 
                 _AssemblyRelinkMap = new Dictionary<string, ModuleDefinition>();
-                string[] entries = Directory.GetFiles(Path.GetDirectoryName(typeof(ModRelinker).Assembly.Location));
+                string[] entries = Directory.GetFiles(ManagedDirectory);
                 for (int i = 0; i < entries.Length; i++) {
                     string path = entries[i];
                     string name = Path.GetFileName(path);
@@ -70,7 +72,8 @@ namespace YLMAPI {
         }
 
         public static Assembly GetRelinkedAssembly(this GameModMetadata meta, Stream stream) {
-            string cachedName = meta.Name + "." + meta.DLL.Substring(0, meta.DLL.Length - 3) + "dll";
+            string name = Path.GetFileName(meta.DLL);
+            string cachedName = meta.Name + "." + name.Substring(0, name.Length - 3) + "dll";
             string cachedPath = Path.Combine(ModLoader.ModsCacheDirectory, cachedName);
             string cachedChecksumPath = Path.Combine(ModLoader.ModsCacheDirectory, cachedName + ".sum");
 
@@ -94,21 +97,26 @@ namespace YLMAPI {
 
             using (MonoModder modder = new MonoModder() {
                 Input = stream,
-                OutputPath = cachedPath
-            }) {
-                modder.CleanupEnabled = false;
+                OutputPath = cachedPath,
+                CleanupEnabled = false,
+                RelinkModuleMap = AssemblyRelinkMap,
+                DependencyDirs = {
+                    ManagedDirectory
+                }
+            })
+                try {
+                    modder.ReaderParameters.ReadSymbols = false;
+                    modder.WriterParameters.WriteSymbols = false;
+                    modder.WriterParameters.SymbolWriterProvider = null;
 
-                modder.RelinkModuleMap = AssemblyRelinkMap;
-
-                modder.ReaderParameters.ReadSymbols = false;
-                modder.WriterParameters.WriteSymbols = false;
-                modder.WriterParameters.SymbolWriterProvider = null;
-
-                modder.Read();
-                modder.MapDependencies();
-                modder.AutoPatch();
-                modder.Write();
-            }
+                    modder.Read();
+                    modder.MapDependencies();
+                    modder.AutoPatch();
+                    modder.Write();
+                } catch (Exception e) {
+                    ModLogger.Log("relinker", $"Failed relinking {meta}: {e}");
+                    return null;
+                }
 
             return Assembly.LoadFrom(cachedPath);
         }

@@ -34,10 +34,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\libs\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\libs-stripped\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\libs\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>..\libs-stripped\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="Ionic.Zip">
       <HintPath>..\libs\Ionic.Zip.dll</HintPath>
@@ -53,13 +53,13 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine">
-      <HintPath>..\libs\UnityEngine.dll</HintPath>
+      <HintPath>..\libs-stripped\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.Networking">
-      <HintPath>..\libs\UnityEngine.Networking.dll</HintPath>
+      <HintPath>..\libs-stripped\UnityEngine.Networking.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\libs\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\libs-stripped\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="YamlDotNet">
       <HintPath>..\libs\YamlDotNet.dll</HintPath>
@@ -103,12 +103,6 @@
     <Compile Include="..\SGUI\src\Backends\SGUIIMBackend.cs" />
     <Compile Include="..\SGUI\src\Backends\SGUIIMEditorBackend.cs" />
     <Compile Include="..\SGUI\src\DFEXT\SGUIDFInput.cs" />
-    <Compile Include="..\SGUI\src\DotNetEXT\AddingNewEventArgs.cs" />
-    <Compile Include="..\SGUI\src\DotNetEXT\AddingNewEventHandler.cs" />
-    <Compile Include="..\SGUI\src\DotNetEXT\BindingList.cs" />
-    <Compile Include="..\SGUI\src\DotNetEXT\IBindingList.cs" />
-    <Compile Include="..\SGUI\src\DotNetEXT\ICancelAddNew.cs" />
-    <Compile Include="..\SGUI\src\DotNetEXT\IRaiseItemChangedEvents.cs" />
     <Compile Include="..\SGUI\src\EMouseStatus.cs" />
     <Compile Include="..\SGUI\src\Elements\SButton.cs" />
     <Compile Include="..\SGUI\src\Elements\SGroup.cs" />

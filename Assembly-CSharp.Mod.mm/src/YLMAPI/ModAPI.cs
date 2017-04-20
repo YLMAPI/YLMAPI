@@ -14,7 +14,7 @@ using System.Reflection;
 namespace YLMAPI {
     public static class ModAPI {
 
-        public readonly static Version Version = new Version(0, 3, 0);
+        public readonly static Version Version = new Version(0, 0, 0);
         // The following line will be replaced by Travis.
         public readonly static int TravisBuild = 0;
         /// <summary>
@@ -75,6 +75,8 @@ namespace YLMAPI {
             ModGUI.Init();
 
             ModLoader.LoadMods();
+
+            ModLoader.Invoke("Init");
         }
 
         public static void OnSceneLoaded(Scene scene, LoadSceneMode mode) {

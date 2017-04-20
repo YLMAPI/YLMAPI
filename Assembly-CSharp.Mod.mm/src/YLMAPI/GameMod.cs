@@ -79,7 +79,17 @@ namespace YLMAPI {
         /// UsingIt depends on ExampleAPI 1.5 and 1.6 is installed. Pass.
         /// UsingIt depends on ExampleAPI 1.5 and 1.0 is installed. Fail.
         /// </summary>
+        [YamlIgnore]
         public virtual Version Version { get; set; } = new Version(1, 0);
+        [YamlMember(Alias = "Version")]
+        public string VersionString {
+            get {
+                return Version.ToString();
+            }
+            set {
+                Version = new Version(value);
+            }
+        }
 
         /// <summary>
         /// The path of the mod .dll inside the ZIP or the relative DLL path with extracted mods.
@@ -94,6 +104,7 @@ namespace YLMAPI {
         /// <summary>
         /// The base profile used to compile this mod.
         /// </summary>
+        [YamlMember(Alias = "Profile")]
         public virtual int ProfileID { get; set; }
 
         /// <summary>
@@ -106,41 +117,46 @@ namespace YLMAPI {
         }
 
         internal static GameModMetadata Parse(string archive, string directory, StreamReader reader) {
-            GameModMetadata metadata;
+            GameModMetadata meta;
             try {
-                metadata = YamlHelper.Deserializer.Deserialize<GameModMetadata>(reader);
+                meta = YamlHelper.Deserializer.Deserialize<GameModMetadata>(reader);
             } catch (Exception e) {
                 ModLogger.Log("loader", "Failed parsing metadata.yaml: " + e);
                 return null;
             }
-            if (metadata == null) {
+            if (meta == null) {
                 ModLogger.Log("loader", "Failed parsing metadata.yaml: YamlDotNet returned null");
                 return null;
             }
-            metadata.Archive = archive;
-            metadata.Directory = directory;
+            meta.Archive = archive;
+            meta.Directory = directory;
 
             if (!string.IsNullOrEmpty(directory)) {
-                metadata.DLL = Path.Combine(directory, metadata.DLL.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
+                meta.DLL = Path.Combine(directory, meta.DLL.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
             }
 
             // Add dependency to API 1.0 if missing.
             bool dependsOnAPI = false;
-            foreach (GameModMetadata dependency in metadata.Dependencies) {
-                if (dependency.Name == "YLMAPI") {
+            foreach (GameModMetadata dep in meta.Dependencies) {
+                if (dep.Name == "API") {
+                    dep.Name = "YLMAPI";
+                    dependsOnAPI = true;
+                    break;
+                }
+                if (dep.Name == "YLMAPI") {
                     dependsOnAPI = true;
                     break;
                 }
             }
             if (!dependsOnAPI) {
-                Debug.Log("WARNING: No dependency to API found in " + metadata + "! Adding dependency to API 1.0...");
-                metadata.Dependencies.Insert(0, new GameModMetadata() {
+                Debug.Log("WARNING: No dependency to API found in " + meta + "! Adding dependency to API 1.0...");
+                meta.Dependencies.Insert(0, new GameModMetadata() {
                     Name = "API",
                     Version = new Version(1, 0)
                 });
             }
 
-            return metadata;
+            return meta;
         }
 
     }

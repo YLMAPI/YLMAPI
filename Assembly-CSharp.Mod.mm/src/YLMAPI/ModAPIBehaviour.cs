@@ -15,6 +15,10 @@ namespace YLMAPI {
             gameObject.tag = "DoNotPause";
         }
 
+        public void Start() {
+            ModLoader.Invoke("Start");
+        }
+
         public void Update() {
             ModEvents.Update();
         }

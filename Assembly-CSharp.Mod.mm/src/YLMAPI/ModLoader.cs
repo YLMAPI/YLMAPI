@@ -171,7 +171,7 @@ namespace YLMAPI {
                 _ModuleMethods.Add(new Dictionary<string, MethodInfo>());
             }
 
-            ModLogger.Log("loader", $"Mod {meta.Name} initialized.");
+            ModLogger.Log("loader", $"Mod {meta} initialized.");
 
         }
 
@@ -224,9 +224,8 @@ namespace YLMAPI {
                 using (FileStream fs = File.OpenRead(meta.DLL))
                     asm = meta.GetRelinkedAssembly(fs);
 
-            if (asm == null) {
+            if (asm == null)
                 return;
-            }
 
             ModContent.Crawl(asm);
 
@@ -245,7 +244,7 @@ namespace YLMAPI {
                 _ModuleMethods.Add(new Dictionary<string, MethodInfo>());
             }
 
-            ModLogger.Log("loader", $"Mod {meta.Name} initialized.");
+            ModLogger.Log("loader", $"Mod {meta} initialized.");
         }
 
 
@@ -259,7 +258,7 @@ namespace YLMAPI {
             string depName = dep.Name;
             Version depVersion = dep.Version;
 
-            if (depName == "API") {
+            if (depName == "YLMAPI") {
                 if (ModAPI.Version.Major != depVersion.Major)
                     return false;
                 if (ModAPI.Version.Minor < depVersion.Minor)
@@ -315,11 +314,11 @@ namespace YLMAPI {
 
 
         /// <summary>
-        /// Calls a method in every mod.
+        /// Invokes a method in every mod.
         /// </summary>
         /// <param name="methodName">Method name of the method to call.</param>
         /// <param name="args">Arguments to pass - null for none.</param>
-        public static void CallInEachMod(string methodName, object[] args = null) {
+        public static void Invoke(string methodName, object[] args = null) {
             Type[] argsTypes = null;
             if (args == null) {
                 args = _EmptyObjectArray;
