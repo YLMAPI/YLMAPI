@@ -83,11 +83,9 @@
     <Compile Include="src\YLMAPI\YLMAPIMenuExt.cs" />
     <Compile Include="src\Patch\FrontendMainScreenController.cs" />
     <Compile Include="src\Patch\PlayerInputStore.cs" />
-    <Compile Include="src\FreeCam\SimpleSmoothMouseLook.cs" />
     <Compile Include="src\Common\UnityEnumerator.cs" />
     <Compile Include="src\YLMAPI\ModAPI.cs" />
     <Compile Include="src\YLMAPI\YLMAPIExt.cs" />
-    <Compile Include="src\FreeCam\YLModFreeCamera.cs" />
     <Compile Include="src\YLMAPI\YLMAPIInternalExt.cs" />
     <Compile Include="src\YLMAPI\ModGUI.cs" />
     <Compile Include="src\Patch\PauseMainScreenController.cs" />

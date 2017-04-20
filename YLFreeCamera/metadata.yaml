@@ -1,0 +1,7 @@
+﻿# Game mod metadata files are .yaml files.
+Name: Magic Camera
+Version: 0.0.0
+DLL: YLFreeCamera.dll
+Dependencies:
+- Name: API
+  Version: 0.0.0

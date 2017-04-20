@@ -106,7 +106,17 @@ namespace YLMAPI {
         }
 
         internal static GameModMetadata Parse(string archive, string directory, StreamReader reader) {
-            GameModMetadata metadata = YamlHelper.Deserializer.Deserialize<GameModMetadata>(reader);
+            GameModMetadata metadata;
+            try {
+                metadata = YamlHelper.Deserializer.Deserialize<GameModMetadata>(reader);
+            } catch (Exception e) {
+                ModLogger.Log("loader", "Failed parsing metadata.yaml: " + e);
+                return null;
+            }
+            if (metadata == null) {
+                ModLogger.Log("loader", "Failed parsing metadata.yaml: YamlDotNet returned null");
+                return null;
+            }
             metadata.Archive = archive;
             metadata.Directory = directory;
 

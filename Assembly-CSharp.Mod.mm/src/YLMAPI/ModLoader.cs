@@ -41,37 +41,28 @@ namespace YLMAPI {
 
             if (File.Exists(ModsBlacklistFile)) {
                 _ModsBlacklist = File.ReadAllLines(ModsBlacklistFile).Select(l => (l.StartsWith("#") ? "" : l).Trim()).ToList();
-            } else {
+            } else
                 using (StreamWriter writer = File.CreateText(ModsBlacklistFile)) {
                     writer.WriteLine("# This is a blacklist file. Lines starting with # are ignored.");
                     writer.WriteLine("ExampleFolder");
                     writer.WriteLine("SomeMod.zip");
                 }
-            }
 
             string[] files = Directory.GetFiles(ModsDirectory);
             for (int i = 0; i < files.Length; i++) {
                 string file = Path.GetFileName(files[i]);
                 if (!file.EndsWith(".zip"))
                     continue;
-                LoadMod(file);
+                LoadModZIP(file);
             }
             files = Directory.GetDirectories(ModsDirectory);
             for (int i = 0; i < files.Length; i++) {
                 string file = Path.GetFileName(files[i]);
-                if (file == "RelinkCache")
+                if (file == "Cache")
                     continue;
-                LoadMod(file);
+                LoadModDir(file);
             }
 
-        }
-
-        public static void LoadMod(string path) {
-            if (path.EndsWith(".zip")) {
-                LoadModZIP(path);
-            } else if (Directory.Exists(path)) {
-                LoadModDir(path);
-            }
         }
 
         public static void LoadModZIP(string archive) {
@@ -200,7 +191,7 @@ namespace YLMAPI {
             Assembly asm = null;
 
             // First read the metadata, ...
-            string metaPath = Path.Combine(dir, "metadata.txt");
+            string metaPath = Path.Combine(dir, "metadata.yaml");
             if (File.Exists(metaPath))
                 using (StreamReader reader = new StreamReader(metaPath))
                     meta = GameModMetadata.Parse("", dir, reader);

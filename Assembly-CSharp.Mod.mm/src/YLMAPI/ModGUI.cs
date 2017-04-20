@@ -310,7 +310,7 @@ namespace YLMAPI {
                 MainGroup.Visible = !MainGroup.Visible;
                 Cursor.visible = MainGroup.Visible;
                 Cursor.lockState = CursorLockMode.None;
-                UnityEngine.Object.FindObjectsOfType<SimpleSmoothMouseLook>().ForEach((ssml, i) => ssml.enabled = !MainGroup.Visible);
+                // UnityEngine.Object.FindObjectsOfType<SimpleSmoothMouseLook>().ForEach((ssml, i) => ssml.enabled = !MainGroup.Visible);
             }
 
             if (Input.GetKeyDown(KeyCode.F11)) {

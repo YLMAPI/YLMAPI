@@ -75,9 +75,6 @@ namespace YLMAPI {
             ModGUI.Init();
 
             ModLoader.LoadMods();
-
-            // FIXME: Initialize runtime mods separately!
-            YLModFreeCamera.Init();
         }
 
         public static void OnSceneLoaded(Scene scene, LoadSceneMode mode) {

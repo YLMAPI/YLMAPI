@@ -9,41 +9,39 @@ using UnityStandardAssets.ImageEffects;
 using UnityEngine.SceneManagement;
 using YLMAPI;
 
-public static class YLModFreeCamera {
+public class YLFreeCamera : GameMod {
 
-    public static bool IsInitialized { get; internal set; }
-    public static bool IsEnabled;
-    public static bool IsGUIVisible = true;
+    public static YLFreeCamera Instance;
 
-    private static bool WasFullBright;
-    public static bool IsFullBright;
-    public static Vector4 OriginalAmbienceColor;
+    public bool IsEnabled;
+    public bool IsGUIVisible = true;
 
-    public static SGroup GUIInfoGroup;
-    public static SLabel GUIInfoGameSpeed;
-    public static SLabel GUIInfoMoveSpeed;
-    public static SLabel GUIInfoSceneName;
-    public static SLabel GUIInfoPosition;
-    public static SLabel GUIInfoRotation;
+    private bool WasFullBright;
+    public bool IsFullBright;
+    public Vector4 OriginalAmbienceColor;
 
-    public static SGroup GUISettingsGroup;
+    public SGroup GUIInfoGroup;
+    public SLabel GUIInfoGameSpeed;
+    public SLabel GUIInfoMoveSpeed;
+    public SLabel GUIInfoSceneName;
+    public SLabel GUIInfoPosition;
+    public SLabel GUIInfoRotation;
+
+    public SGroup GUISettingsGroup;
 
     public const float DefaultSpeed = 0.1f;
-    public static float Speed = DefaultSpeed;
+    public float Speed = DefaultSpeed;
 
-    public static float TimeSpeed = 1f / 120f;
-    public static float ToSpeedF(this float time) {
-        return time / TimeSpeed;
-    }
-    public static float SpeedF {
+    public float TimeSpeed = 1f / 120f;
+    public float SpeedF {
         get {
-            return Time.unscaledDeltaTime.ToSpeedF();
+            return Time.unscaledDeltaTime / TimeSpeed;
         }
     }
 
-    private static Camera PrevCamera;
-    private static Camera _FreeCamera;
-    public static Camera FreeCamera {
+    private Camera PrevCamera;
+    private Camera _FreeCamera;
+    public Camera FreeCamera {
         get {
             if (_FreeCamera != null)
                 return _FreeCamera;
@@ -89,10 +87,8 @@ public static class YLModFreeCamera {
         }
     }
 
-    public static void Init() {
-        if (IsInitialized)
-            return;
-        IsInitialized = true;
+    public override void Init() {
+        Instance = this;
 
         new SGroup() {
             Parent = ModGUI.HelpGroup,
@@ -293,7 +289,7 @@ public static class YLModFreeCamera {
         ModEvents.OnPlayerInputUpdate += input => !IsEnabled;
     }
 
-    public static void Update() {
+    public void Update() {
         if (ModInput.GetButtonDown("FreeCam Toggle")) {
             IsEnabled = !IsEnabled;
 
@@ -417,7 +413,7 @@ public static class YLModFreeCamera {
 
     }
 
-    public static void ApplyDOFToFreeCam() {
+    public void ApplyDOFToFreeCam() {
         if (CameraManager.Instance == null)
             return;
 
@@ -437,4 +433,6 @@ public static class YLModFreeCamera {
         dof.foregroundOverlap = dofParams.ForegroundOverlap;
     }
 
+    public override void Dispose() {
+    }
 }
