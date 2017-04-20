@@ -70,8 +70,7 @@ namespace YLMAPI {
             if (path.EndsWith(".zip")) {
                 LoadModZIP(path);
             } else if (Directory.Exists(path)) {
-                // TODO: Mod dirs
-                // LoadModDir(path);
+                LoadModDir(path);
             }
         }
 
@@ -87,14 +86,14 @@ namespace YLMAPI {
 
             ModLogger.Log("loader", $"Loading mod .zip: {archive}");
 
+            GameModMetadata meta = null;
             Assembly asm = null;
 
-            GameModMetadata meta = null;
             using (ZipFile zip = ZipFile.Read(archive)) {
                 Texture2D icon = null;
                 // First read the metadata, ...
                 foreach (ZipEntry entry in zip.Entries) {
-                    if (entry.FileName == "metadata.txt") {
+                    if (entry.FileName == "metadata.yaml") {
                         using (MemoryStream ms = new MemoryStream()) {
                             entry.Extract(ms);
                             ms.Seek(0, SeekOrigin.Begin);
@@ -183,6 +182,79 @@ namespace YLMAPI {
 
             ModLogger.Log("loader", $"Mod {meta.Name} initialized.");
 
+        }
+
+        public static void LoadModDir(string dir) {
+            if (!Directory.Exists(dir)) {
+                // Probably a mod in the mod directory
+                dir = Path.Combine(ModsDirectory, dir);
+            }
+            if (!Directory.Exists(dir)) {
+                // It just doesn't exist.
+                return;
+            }
+
+            ModLogger.Log("loader", $"Loading mod directory: {dir}");
+
+            GameModMetadata meta = null;
+            Assembly asm = null;
+
+            // First read the metadata, ...
+            string metaPath = Path.Combine(dir, "metadata.txt");
+            if (File.Exists(metaPath))
+                using (StreamReader reader = new StreamReader(metaPath))
+                    meta = GameModMetadata.Parse("", dir, reader);
+
+            if (meta != null) {
+                // ... then check if the mod runs on this profile ...
+                if (meta.ProfileID > ModAPI.Profile.Id) {
+                    ModLogger.Log("loader", "Mod meant for an in-dev YLMAPI version!");
+                    return;
+                }
+
+                // ... then check if the dependencies are loaded ...
+                foreach (GameModMetadata dep in meta.Dependencies)
+                    if (!DependencyLoaded(dep)) {
+                        ModLogger.Log("loader", $"Dependency {dep} of mod {meta} not loaded!");
+                        return;
+                    }
+
+                // ... then add an AssemblyResolve handler for all the .zip-ped libraries
+                AppDomain.CurrentDomain.AssemblyResolve += meta._GenerateModAssemblyResolver();
+            }
+
+            // ... then everything else
+            ModContent.Crawl(dir);
+            if (meta == null || !File.Exists(meta.DLL))
+                return;
+            if (meta.Prelinked)
+                asm = Assembly.LoadFrom(meta.DLL);
+            else
+                using (FileStream fs = File.OpenRead(meta.DLL))
+                    asm = meta.GetRelinkedAssembly(fs);
+
+            if (asm == null) {
+                return;
+            }
+
+            ModContent.Crawl(asm);
+
+            Type[] types = asm.GetTypes();
+            for (int i = 0; i < types.Length; i++) {
+                Type type = types[i];
+                if (!typeof(GameMod).IsAssignableFrom(type) || type.IsAbstract)
+                    continue;
+
+                GameMod mod = (GameMod) type.GetConstructor(_EmptyTypeArray).Invoke(_EmptyObjectArray);
+
+                mod.Metadata = meta;
+
+                Mods.Add(mod);
+                _ModuleTypes.Add(type);
+                _ModuleMethods.Add(new Dictionary<string, MethodInfo>());
+            }
+
+            ModLogger.Log("loader", $"Mod {meta.Name} initialized.");
         }
 
 
