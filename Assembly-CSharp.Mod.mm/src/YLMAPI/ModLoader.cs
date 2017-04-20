@@ -30,8 +30,6 @@ namespace YLMAPI {
         public static string ModsCacheDirectory;
         public static string ModsBlacklistFile;
 
-        private static List<string> _ModsBlacklist = new List<string>();
-
         public static void LoadMods() {
             Directory.CreateDirectory(ModsDirectory = Path.Combine(ModAPI.GameDirectory, "Mods"));
             Directory.CreateDirectory(ModsCacheDirectory = Path.Combine(ModsDirectory, "Cache"));
@@ -39,8 +37,9 @@ namespace YLMAPI {
 
             ModLogger.Log("loader", "Loading game mods");
 
+            List<string> blacklist = new List<string>();
             if (File.Exists(ModsBlacklistFile)) {
-                _ModsBlacklist = File.ReadAllLines(ModsBlacklistFile).Select(l => (l.StartsWith("#") ? "" : l).Trim()).ToList();
+                blacklist = File.ReadAllLines(ModsBlacklistFile).Select(l => (l.StartsWith("#") ? "" : l).Trim()).ToList();
             } else
                 using (StreamWriter writer = File.CreateText(ModsBlacklistFile)) {
                     writer.WriteLine("# This is a blacklist file. Lines starting with # are ignored.");
@@ -51,14 +50,14 @@ namespace YLMAPI {
             string[] files = Directory.GetFiles(ModsDirectory);
             for (int i = 0; i < files.Length; i++) {
                 string file = Path.GetFileName(files[i]);
-                if (!file.EndsWith(".zip"))
+                if (!file.EndsWith(".zip") || blacklist.Contains(file))
                     continue;
                 LoadModZIP(file);
             }
             files = Directory.GetDirectories(ModsDirectory);
             for (int i = 0; i < files.Length; i++) {
                 string file = Path.GetFileName(files[i]);
-                if (file == "Cache")
+                if (file == "Cache" || blacklist.Contains(file))
                     continue;
                 LoadModDir(file);
             }
