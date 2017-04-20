@@ -4,7 +4,7 @@ using YLMAPI;
 // Very simple smooth mouselook modifier for the MainCamera in Unity
 // by Francis R. Griffiths-Keam - www.runningdimensions.com
 
-[AddComponentMenu("Camera/Simple Smooth Mouse Look ")]
+[AddComponentMenu("Camera/Simple Smooth Mouse Look")]
 public class SimpleSmoothMouseLook : MonoBehaviour {
     [HideInInspector]
     public Vector2 mouseAbsolute;

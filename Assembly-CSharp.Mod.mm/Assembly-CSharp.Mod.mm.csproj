@@ -35,31 +35,39 @@
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\libs-stripped\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\libs-stripped\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Ionic.Zip">
       <HintPath>..\libs\Ionic.Zip.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil">
       <HintPath>..\libs\Mono.Cecil.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod">
       <HintPath>..\libs\MonoMod.exe</HintPath>
     </Reference>
-    <Reference Include="Rewired_Core">
-      <HintPath>..\libs\Rewired_Core.dll</HintPath>
+    <Reference Include="Rewired_Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs-stripped\Rewired_Core.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine">
       <HintPath>..\libs-stripped\UnityEngine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.Networking">
       <HintPath>..\libs-stripped\UnityEngine.Networking.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>..\libs-stripped\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="YamlDotNet">
       <HintPath>..\libs\YamlDotNet.dll</HintPath>
@@ -68,6 +76,7 @@
   <ItemGroup>
     <Compile Include="src\Common\AssetMetadata.cs" />
     <Compile Include="src\Common\LimitedStream.cs" />
+    <Compile Include="src\MonoMod\MonoModRules.cs" />
     <Compile Include="src\YLMAPI\GameMod.cs" />
     <Compile Include="src\YLMAPI\ModRelinker.cs" />
     <Compile Include="src\YLMAPI\ModLoader.cs" />
@@ -131,12 +140,63 @@
     <EmbeddedResource Include="Content\ylmod\gui\refresh.png">
       <LogicalName>Content/ylmod/gui/refresh.png</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="Content\ylmod\gui\camera.png">
-      <LogicalName>Content/ylmod/gui/camera.png</LogicalName>
-    </EmbeddedResource>
     <EmbeddedResource Include="Content\ylmod\scenes.txt">
       <LogicalName>Content/ylmod/scenes.txt</LogicalName>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\libs-ext\I18N.CJK.dll">
+      <Link>I18N.CJK.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\libs-ext\I18N.dll">
+      <Link>I18N.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\libs-ext\I18N.MidEast.dll">
+      <Link>I18N.MidEast.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\libs-ext\I18N.Other.dll">
+      <Link>I18N.Other.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\libs-ext\I18N.Rare.dll">
+      <Link>I18N.Rare.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\libs-ext\I18N.West.dll">
+      <Link>I18N.West.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\libs-ext\Mono.Posix.dll">
+      <Link>Mono.Posix.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\libs-ext\Mono.Security.dll">
+      <Link>Mono.Security.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\libs-ext\System.Configuration.dll">
+      <Link>System.Configuration.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\libs-ext\System.Core.dll">
+      <Link>System.Core.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\libs-ext\System.dll">
+      <Link>System.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\libs-ext\System.Security.dll">
+      <Link>System.Security.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\libs-ext\System.Xml.dll">
+      <Link>System.Xml.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
