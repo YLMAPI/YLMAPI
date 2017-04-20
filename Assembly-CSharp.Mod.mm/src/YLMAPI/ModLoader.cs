@@ -149,29 +149,8 @@ namespace YLMAPI {
                 }
             }
 
-            if (meta == null || asm == null) {
-                return;
-            }
-
-            ModContent.Crawl(asm);
-
-            Type[] types = asm.GetTypes();
-            for (int i = 0; i < types.Length; i++) {
-                Type type = types[i];
-                if (!typeof(GameMod).IsAssignableFrom(type) || type.IsAbstract)
-                    continue;
-
-                GameMod mod = (GameMod) type.GetConstructor(_EmptyTypeArray).Invoke(_EmptyObjectArray);
-
-                mod.Metadata = meta;
-
-                Mods.Add(mod);
-                _ModuleTypes.Add(type);
-                _ModuleMethods.Add(new Dictionary<string, MethodInfo>());
-            }
-
-            ModLogger.Log("loader", $"Mod {meta} initialized.");
-
+            if (meta != null && asm != null)
+                LoadMod(meta, asm);
         }
 
         public static void LoadModDir(string dir) {
@@ -223,12 +202,21 @@ namespace YLMAPI {
                 using (FileStream fs = File.OpenRead(meta.DLL))
                     asm = meta.GetRelinkedAssembly(fs);
 
-            if (asm == null)
-                return;
+            if (asm != null)
+                LoadMod(meta, asm);
+        }
 
+        public static void LoadMod(GameModMetadata meta, Assembly asm) {
             ModContent.Crawl(asm);
 
-            Type[] types = asm.GetTypes();
+            Type[] types;
+            try {
+                types = asm.GetTypes();
+            } catch (Exception e) {
+                e.LogDetailed();
+                ModLogger.Log("loader", $"Failed reading assembly: {e}");
+                return;
+            }
             for (int i = 0; i < types.Length; i++) {
                 Type type = types[i];
                 if (!typeof(GameMod).IsAssignableFrom(type) || type.IsAbstract)

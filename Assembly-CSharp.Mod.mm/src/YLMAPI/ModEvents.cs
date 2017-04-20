@@ -29,6 +29,10 @@ namespace YLMAPI {
         public static void TextsLoaded(TextManager manager, string[] tables, string[][] stringData)
             => OnTextsLoaded?.Invoke(manager, tables, stringData);
 
+        public static event Action<Transform> OnInspect;
+        public static void Inspect(Transform t)
+            => OnInspect?.Invoke(t);
+
         /// <summary>
         /// Invokes all delegates in the invocation list, passing on the result to the next.
         /// </summary>

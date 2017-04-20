@@ -20,13 +20,13 @@ namespace SGUI {
 
         public override void Init() {
             if (DefaultChecked == null) {
-                DefaultChecked = ModContent.Load<Texture2D>("ylmod/gui/checkbox_checked");
+                DefaultChecked = ModContent.Load<Texture2D>("ylmapi/gui/checkbox_checked");
                 if (DefaultChecked != null) {
                     DefaultChecked.filterMode = FilterMode.Trilinear;
                 }
             }
             if (DefaultUnchecked == null) {
-                DefaultUnchecked = ModContent.Load<Texture2D>("ylmod/gui/checkbox_unchecked");
+                DefaultUnchecked = ModContent.Load<Texture2D>("ylmapi/gui/checkbox_unchecked");
                 if (DefaultUnchecked != null) {
                     DefaultUnchecked.filterMode = FilterMode.Trilinear;
                 }

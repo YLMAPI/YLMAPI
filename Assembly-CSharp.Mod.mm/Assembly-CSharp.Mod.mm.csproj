@@ -131,17 +131,17 @@
     <Compile Include="..\SGUI\src\SModifier.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Content\ylmod\gui\checkbox_checked.png">
-      <LogicalName>Content/ylmod/gui/checkbox_checked.png</LogicalName>
+    <EmbeddedResource Include="Content\ylmapi\gui\checkbox_checked.png">
+      <LogicalName>Content/ylmapi/gui/checkbox_checked.png</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="Content\ylmod\gui\checkbox_unchecked.png">
-      <LogicalName>Content/ylmod/gui/checkbox_unchecked.png</LogicalName>
+    <EmbeddedResource Include="Content\ylmapi\gui\checkbox_unchecked.png">
+      <LogicalName>Content/ylmapi/gui/checkbox_unchecked.png</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="Content\ylmod\gui\refresh.png">
-      <LogicalName>Content/ylmod/gui/refresh.png</LogicalName>
+    <EmbeddedResource Include="Content\ylmapi\gui\refresh.png">
+      <LogicalName>Content/ylmapi/gui/refresh.png</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="Content\ylmod\scenes.txt">
-      <LogicalName>Content/ylmod/scenes.txt</LogicalName>
+    <EmbeddedResource Include="Content\ylmapi\scenes.txt">
+      <LogicalName>Content/ylmapi/scenes.txt</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

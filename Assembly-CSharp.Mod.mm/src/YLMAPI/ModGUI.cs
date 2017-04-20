@@ -356,7 +356,7 @@ namespace YLMAPI {
             return button;
         }
         private static IEnumerator _ListScenes() {
-            using (StreamReader reader = new StreamReader(ModContent.GetMapped("ylmod/gui/scenes").Stream))
+            using (StreamReader reader = new StreamReader(ModContent.GetMapped("ylmapi/scenes.txt").Stream))
                 while (!reader.EndOfStream) {
                     string line = reader.ReadLine().Trim();
                     if (line.Length == 0)
@@ -413,7 +413,7 @@ namespace YLMAPI {
 
             new SButton("Refresh") {
                 Parent = HierarchyGroup,
-                Icon = ModContent.Load<Texture2D>("ylmod/gui/refresh"),
+                Icon = ModContent.Load<Texture2D>("ylmapi/gui/refresh"),
                 IconScale = new Vector2(0.25f, 0.25f),
                 Alignment = TextAnchor.MiddleLeft,
                 OnClick = elem => {
@@ -508,7 +508,7 @@ namespace YLMAPI {
 
             new SButton("Refresh") {
                 Parent = InspectorGroup,
-                Icon = ModContent.Load<Texture2D>("ylmod/gui/refresh"),
+                Icon = ModContent.Load<Texture2D>("ylmapi/gui/refresh"),
                 IconScale = new Vector2(0.25f, 0.25f),
                 Alignment = TextAnchor.MiddleLeft,
                 OnClick = elem => {
@@ -534,13 +534,16 @@ namespace YLMAPI {
                 Parent = InspectorGroup,
                 Alignment = TextAnchor.MiddleLeft,
                 With = { new SCheckboxModifier() {
-                GetValue = b => t.gameObject.activeSelf,
-                SetValue = (b, v) => t.gameObject.SetActive(v)
-            }}
+                    GetValue = b => t.gameObject.activeSelf,
+                    SetValue = (b, v) => t.gameObject.SetActive(v)
+                }}
             };
+
+            ModEvents.Inspect(t);
+
             new SButton("Move Camera To Object") {
                 Parent = InspectorGroup,
-                Icon = ModContent.Load<Texture2D>("ylmod/gui/camera"),
+                Icon = ModContent.Load<Texture2D>("ylmapi/gui/camera"),
                 IconScale = new Vector2(0.25f, 0.25f),
                 Alignment = TextAnchor.MiddleLeft,
                 OnClick = elem => {
