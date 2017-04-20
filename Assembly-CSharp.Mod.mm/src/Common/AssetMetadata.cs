@@ -1,4 +1,4 @@
-﻿// using Ionic.Zip;
+﻿using Ionic.Zip;
 using System.IO;
 using IOFile = System.IO.File;
 using System.Reflection;
@@ -35,7 +35,6 @@ public class AssetMetadata {
                 stream = IOFile.OpenRead(File);
             } else if (Container == ContainerType.Zip) {
                 throw new System.Exception("ZIP files as container type not yet supported");
-                /*
                 string file = File.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
                 using (ZipFile zip = ZipFile.Read(Zip)) {
                     foreach (ZipEntry entry in zip.Entries) {
@@ -47,7 +46,6 @@ public class AssetMetadata {
                         }
                     }
                 }
-                */
             } else if (Container == ContainerType.Assembly) {
                 stream = Assembly.GetManifestResourceStream(File);
             }

@@ -39,6 +39,9 @@
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\libs\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
+    <Reference Include="Ionic.Zip">
+      <HintPath>..\libs\Ionic.Zip.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Cecil">
       <HintPath>..\libs\Mono.Cecil.dll</HintPath>
     </Reference>
@@ -58,22 +61,29 @@
     <Reference Include="UnityEngine.UI">
       <HintPath>..\libs\UnityEngine.UI.dll</HintPath>
     </Reference>
+    <Reference Include="YamlDotNet">
+      <HintPath>..\libs\YamlDotNet.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\Common\AssetMetadata.cs" />
     <Compile Include="src\Common\LimitedStream.cs" />
+    <Compile Include="src\YLMAPI\GameMod.cs" />
+    <Compile Include="src\YLMAPI\ModRelinker.cs" />
+    <Compile Include="src\YLMAPI\ModLoader.cs" />
     <Compile Include="src\YLMAPI\ModEvents.cs" />
+    <Compile Include="src\Common\YamlHelper.cs" />
     <Compile Include="src\YLMAPI\ModProfile.cs" />
-    <Compile Include="src\YLMAPI\SGUIExt\SGroupMinimumContentSizeModifier.cs" />
-    <Compile Include="src\YLMAPI\SGUIExt\SGroupForceScrollModifier.cs" />
-    <Compile Include="src\YLMAPI\SGUIExt\SCheckboxModifier.cs" />
+    <Compile Include="src\SGUIExt\SGroupMinimumContentSizeModifier.cs" />
+    <Compile Include="src\SGUIExt\SGroupForceScrollModifier.cs" />
+    <Compile Include="src\SGUIExt\SCheckboxModifier.cs" />
     <Compile Include="src\YLMAPI\ModLogger.cs" />
     <Compile Include="src\YLMAPI\ModContent.cs" />
     <Compile Include="src\YLMAPI\ModInput.cs" />
     <Compile Include="src\YLMAPI\YLMAPIMenuExt.cs" />
     <Compile Include="src\Patch\FrontendMainScreenController.cs" />
     <Compile Include="src\Patch\PlayerInputStore.cs" />
-    <Compile Include="src\Third-Party\SimpleSmoothMouseLook.cs" />
+    <Compile Include="src\FreeCam\SimpleSmoothMouseLook.cs" />
     <Compile Include="src\Common\UnityEnumerator.cs" />
     <Compile Include="src\YLMAPI\ModAPI.cs" />
     <Compile Include="src\YLMAPI\YLMAPIExt.cs" />

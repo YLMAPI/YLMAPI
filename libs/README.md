@@ -6,5 +6,8 @@ Feel free to replace the .dlls **locally** though.
 
 Files that are not stripped as their full functionality is required:
 
-* Mono.Cecil.dll
+* Mono.Cecil*.dll
 * MonoMod.exe
+* Ionic.Zip.dll
+* YamlDotNet.dll
+* I18N*.dll

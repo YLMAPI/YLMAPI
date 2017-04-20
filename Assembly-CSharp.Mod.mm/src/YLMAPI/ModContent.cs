@@ -14,7 +14,10 @@ using System.Reflection;
 namespace YLMAPI {
     public static partial class ModContent {
 
-        public class AssetDirectory { private AssetDirectory() { } }
+        public sealed class AssetDirectory { private AssetDirectory() { } }
+
+        public static string ContentDirectory;
+        public static string TextsDirectory;
 
         public readonly static Dictionary<string, AssetMetadata> Map = new Dictionary<string, AssetMetadata>();
         public readonly static Dictionary<string, AssetMetadata> MapDirs = new Dictionary<string, AssetMetadata>();
@@ -25,8 +28,12 @@ namespace YLMAPI {
         };
 
         static ModContent() {
+            Directory.CreateDirectory(ContentDirectory = Path.Combine(ModAPI.GameDirectory, "Content"));
+            Directory.CreateDirectory(TextsDirectory = Path.Combine(ContentDirectory, "Texts"));
+
             Crawl(Assembly.GetExecutingAssembly());
-            Crawl(ModAPI.ContentDirectory);
+            Crawl(ContentDirectory);
+
             ModEvents.OnTextsLoaded += (tm, tables, stringData) => {
                 for (int i = 0; i < stringData.Length; i++) {
                     string[] strings = stringData[i];
@@ -34,7 +41,7 @@ namespace YLMAPI {
                         continue;
                     string key = tables[i] ?? $"texts_{i}";
 
-                    string file = Path.Combine(ModAPI.TextsDirectory, tm.GetLocale());
+                    string file = Path.Combine(TextsDirectory, tm.GetLocale());
                     Directory.CreateDirectory(file);
                     file = Path.Combine(file, key + ".txt");
                     if (!File.Exists(file)) {

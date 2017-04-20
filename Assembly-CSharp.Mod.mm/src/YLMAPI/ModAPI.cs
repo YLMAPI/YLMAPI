@@ -12,7 +12,7 @@ using System.IO;
 using System.Reflection;
 
 namespace YLMAPI {
-    public static partial class ModAPI {
+    public static class ModAPI {
 
         public readonly static Version Version = new Version(0, 3, 0);
         // The following line will be replaced by Travis.
@@ -49,9 +49,6 @@ namespace YLMAPI {
         }
 
         public static string GameDirectory;
-        public static string ModsDirectory;
-        public static string TextsDirectory;
-        public static string ContentDirectory;
 
         public static bool IsInitialized { get; internal set; }
 
@@ -66,12 +63,6 @@ namespace YLMAPI {
 
             GameDirectory = Path.GetDirectoryName(Path.GetFullPath(Application.dataPath));
             Console.WriteLine($"Game directory: {GameDirectory}");
-            ModsDirectory = Path.Combine(GameDirectory, "mods");
-            Directory.CreateDirectory(ModsDirectory);
-            TextsDirectory = Path.Combine(ModsDirectory, "texts");
-            Directory.CreateDirectory(TextsDirectory);
-            ContentDirectory = Path.Combine(ModsDirectory, "content");
-            Directory.CreateDirectory(ContentDirectory);
 
             SceneManager.sceneLoaded += OnSceneLoaded;
             SceneManager.sceneUnloaded += OnSceneUnloaded;
@@ -82,6 +73,8 @@ namespace YLMAPI {
             ModAPIBehaviour ylmb = ModAPIBehaviour.instance;
 
             ModGUI.Init();
+
+            ModLoader.LoadMods();
 
             // FIXME: Initialize runtime mods separately!
             YLModFreeCamera.Init();
