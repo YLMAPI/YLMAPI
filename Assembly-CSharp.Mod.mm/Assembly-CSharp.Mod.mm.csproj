@@ -89,6 +89,7 @@
     <Compile Include="src\YLMAPI\ModLogger.cs" />
     <Compile Include="src\YLMAPI\ModContent.cs" />
     <Compile Include="src\YLMAPI\ModInput.cs" />
+    <Compile Include="src\MonoMod\MMILAccessExample.cs" />
     <Compile Include="src\YLMAPI\YLMAPIMenuExt.cs" />
     <Compile Include="src\Patch\FrontendMainScreenController.cs" />
     <Compile Include="src\Patch\PlayerInputStore.cs" />
