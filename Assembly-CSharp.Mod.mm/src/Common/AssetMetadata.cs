@@ -34,7 +34,6 @@ public class AssetMetadata {
             if (Container == ContainerType.Filesystem) {
                 stream = IOFile.OpenRead(File);
             } else if (Container == ContainerType.Zip) {
-                throw new System.Exception("ZIP files as container type not yet supported");
                 string file = File.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
                 using (ZipFile zip = ZipFile.Read(Zip)) {
                     foreach (ZipEntry entry in zip.Entries) {
