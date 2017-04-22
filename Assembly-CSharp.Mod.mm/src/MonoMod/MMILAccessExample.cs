@@ -28,7 +28,7 @@ namespace MonoMod {
 
                 new Access<MMILAccessExample>(this, "RunSomethingElse").Call();
                 new StaticAccess<MMILAccessExample>("StaticTest").Call("World!", 42);
-                new StaticAccess<MMILAccessExample>("StaticTest").Call("nested calls!", new StaticAccess<MMILAccessExample>("Add").Call<int>(20, 22));
+                new StaticAccess<MMILAccessExample>("StaticTest").Call("nested calls!", new StaticAccess<MMILAccessExample>("Add").Call<int>(8, 13));
 
                 FieldA = 25;
                 FieldB = 4;
