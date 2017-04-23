@@ -7,7 +7,7 @@
     <ProjectGuid>{E438D8F7-4149-47B5-ACF6-7EDC15D00AE7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>YookaLayleeMod</RootNamespace>
+    <RootNamespace>YLMAPI</RootNamespace>
     <AssemblyName>Assembly-CSharp.Mod.mm</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -33,6 +33,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\libs\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\libs-stripped\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
@@ -78,6 +81,7 @@
     <Compile Include="src\Common\LimitedStream.cs" />
     <Compile Include="src\MonoMod\MonoModRules.cs" />
     <Compile Include="src\YLMAPI\GameMod.cs" />
+    <Compile Include="src\YLMAPI\ModRuntimePatcher.cs" />
     <Compile Include="src\YLMAPI\ModRelinker.cs" />
     <Compile Include="src\YLMAPI\ModLoader.cs" />
     <Compile Include="src\YLMAPI\ModEvents.cs" />

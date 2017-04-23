@@ -97,6 +97,11 @@ namespace YLMAPI {
         public virtual string DLL { get; set; }
 
         /// <summary>
+        /// The path of the patch .mm.dll inside the ZIP or the relative DLL path with extracted mods.
+        /// </summary>
+        public virtual string PatchDLL { get; set; }
+
+        /// <summary>
         /// Whether the mod has been prelinked or not.
         /// </summary>
         public virtual bool Prelinked { get; set; } = false;
@@ -133,6 +138,8 @@ namespace YLMAPI {
 
             if (!string.IsNullOrEmpty(directory)) {
                 meta.DLL = Path.Combine(directory, meta.DLL.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
+                if (!string.IsNullOrEmpty(meta.PatchDLL))
+                    meta.PatchDLL = Path.Combine(directory, meta.PatchDLL.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
             }
 
             // Add dependency to API 1.0 if missing.

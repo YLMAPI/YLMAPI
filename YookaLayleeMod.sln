@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp.Mod.mm", "A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YLFreeCamera", "YLFreeCamera\YLFreeCamera.csproj", "{7881C2DE-1E83-40D2-9EAD-FB9D1FFF0AD1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp.YLFreeCamera.mm", "Assembly-CSharp.YLFreeCamera.mm\Assembly-CSharp.YLFreeCamera.mm.csproj", "{7D451E58-1086-4740-8FB0-C4B36DCAA227}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{7881C2DE-1E83-40D2-9EAD-FB9D1FFF0AD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7881C2DE-1E83-40D2-9EAD-FB9D1FFF0AD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7881C2DE-1E83-40D2-9EAD-FB9D1FFF0AD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D451E58-1086-4740-8FB0-C4B36DCAA227}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D451E58-1086-4740-8FB0-C4B36DCAA227}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D451E58-1086-4740-8FB0-C4B36DCAA227}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D451E58-1086-4740-8FB0-C4B36DCAA227}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

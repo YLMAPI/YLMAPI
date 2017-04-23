@@ -15,6 +15,7 @@ namespace YLMAPI {
     public static partial class ModContent {
 
         public sealed class AssetDirectory { private AssetDirectory() { } }
+        public sealed class AssetAssembly { private AssetAssembly() { } }
 
         public static string ContentDirectory;
         public static string TextsDirectory;
@@ -110,7 +111,10 @@ namespace YLMAPI {
         public static string RemoveExtension(string file, out Type type) {
             type = typeof(object);
 
-            if (file.EndsWith(".png")) {
+            if (file.EndsWith(".dll")) {
+                type = typeof(AssetAssembly);
+
+            } else if (file.EndsWith(".png")) {
                 type = typeof(Texture2D);
                 file = file.Substring(0, file.Length - 4);
             }

@@ -128,6 +128,23 @@ namespace YLMAPI {
                     AppDomain.CurrentDomain.AssemblyResolve += meta._GenerateModAssemblyResolver();
                 }
 
+                // ... then the patch (if any) ...
+                if (!string.IsNullOrEmpty(meta?.PatchDLL)) {
+                    foreach (ZipEntry entry in zip.Entries) {
+                        string entryName = entry.FileName.Replace("\\", "/");
+                        if (entryName != meta.PatchDLL)
+                            continue;
+
+                        using (MemoryStream ms = new MemoryStream()) {
+                            entry.Extract(ms);
+                            ms.Seek(0, SeekOrigin.Begin);
+                            ModRuntimePatcher.LoadPatch(ms);
+                        }
+
+                        break;
+                    }
+                }
+
                 // ... then everything else
                 foreach (ZipEntry entry in zip.Entries) {
                     string entryName = entry.FileName.Replace("\\", "/");
@@ -196,6 +213,9 @@ namespace YLMAPI {
             ModContent.Crawl(dir);
             if (meta == null || !File.Exists(meta.DLL))
                 return;
+            if (!string.IsNullOrEmpty(meta.PatchDLL) && File.Exists(meta.PatchDLL))
+                using (Stream stream = File.OpenRead(meta.PatchDLL))
+                    ModRuntimePatcher.LoadPatch(stream);
             if (meta.Prelinked)
                 asm = Assembly.LoadFrom(meta.DLL);
             else

@@ -74,8 +74,8 @@ namespace YLMAPI {
 
             ModGUI.Init();
 
+            ModRuntimePatcher.Init();
             ModLoader.LoadMods();
-
             ModLoader.Invoke("Init");
         }
 
