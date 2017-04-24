@@ -81,9 +81,17 @@ public class YLFreeCamera : GameMod {
             fog.fogShader = Shader.Find("Hidden/GlobalFog");
             */
 
-            _FreeCamera.gameObject.AddComponent<SimpleSmoothMouseLook>();
+            _MouseLook = _FreeCamera.gameObject.AddComponent<SimpleSmoothMouseLook>();
 
             return _FreeCamera;
+        }
+    }
+    private SimpleSmoothMouseLook _MouseLook;
+    public SimpleSmoothMouseLook MouseLook {
+        get {
+            if (_MouseLook != null)
+                return _MouseLook;
+            return _MouseLook = FreeCamera.GetComponent<SimpleSmoothMouseLook>();
         }
     }
 
@@ -307,8 +315,8 @@ public class YLFreeCamera : GameMod {
                 if (PrevCamera != null) {
                     FreeCamera.transform.position = PrevCamera.transform.position;
                     FreeCamera.transform.eulerAngles = new Vector3(0f, PrevCamera.transform.eulerAngles.y, 0f);
-                    FreeCamera.GetComponent<SimpleSmoothMouseLook>().targetDirection = PrevCamera.transform.rotation.eulerAngles;
-                    FreeCamera.GetComponent<SimpleSmoothMouseLook>().mouseAbsolute = Vector2.zero;
+                    MouseLook.targetDirection = PrevCamera.transform.rotation.eulerAngles;
+                    MouseLook.mouseAbsolute = Vector2.zero;
                     FreeCamera.fieldOfView = PrevCamera.fieldOfView;
                     if (FreeCamera.fieldOfView < 10f)
                         FreeCamera.fieldOfView = 75f;
@@ -339,8 +347,13 @@ public class YLFreeCamera : GameMod {
 
         GUIInfoGroup.Visible = IsEnabled && IsGUIVisible;
 
+        if (_FreeCamera != null)
+            MouseLook.enabled = IsEnabled;
+
         if (!IsEnabled)
             return;
+
+        MouseLook.enabled = !ModGUI.MainGroup.Visible;
 
         if (ModInput.GetButtonDown("FreeCam GUI Toggle"))
             IsGUIVisible = !IsGUIVisible;
