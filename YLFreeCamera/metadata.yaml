@@ -2,7 +2,6 @@
 Name: Magic Camera
 Version: 0.0.0
 DLL: YLFreeCamera.dll
-PatchDLL: Assembly-CSharp.YLFreeCamera.mm.dll
 Dependencies:
 - Name: API
   Version: 0.0.0

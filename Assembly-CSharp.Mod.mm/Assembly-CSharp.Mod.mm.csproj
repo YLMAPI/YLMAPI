@@ -33,9 +33,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>..\libs\0Harmony.dll</HintPath>
-    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\libs-stripped\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
@@ -82,6 +79,7 @@
     <Compile Include="src\MonoMod\MonoModRules.cs" />
     <Compile Include="src\YLMAPI\GameMod.cs" />
     <Compile Include="src\YLMAPI\ModRuntimePatcher.cs" />
+    <Compile Include="src\YLMAPI\ModRuntimePatcher_MMHarmony.cs" />
     <Compile Include="src\YLMAPI\ModRelinker.cs" />
     <Compile Include="src\YLMAPI\ModLoader.cs" />
     <Compile Include="src\YLMAPI\ModEvents.cs" />

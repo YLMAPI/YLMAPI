@@ -273,7 +273,7 @@ namespace YLMAPI {
             }
             };
 
-            _ListScenes();
+            _ListScenes().StartGlobal();
         }
 
         public static void SegmentGroupUpdateStyle(SElement elem) {
