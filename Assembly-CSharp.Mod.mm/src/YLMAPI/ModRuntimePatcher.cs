@@ -18,25 +18,47 @@ using ReflectionHelper = MonoMod.InlineRT.ReflectionHelper;
 using System.Security.Cryptography;
 using MonoMod;
 using Mono.Cecil;
+using MonoMod.Detour;
 
 namespace YLMAPI {
     public static class ModRuntimePatcher {
 
+        public static MonoModDetourer Detourer;
+
         public static void Init() {
-            // TODO: ModRuntimePatcher
+            try {
+                Detourer = new MonoModDetourer() {
+                    InputPath = Assembly.GetExecutingAssembly().Location,
+                    CleanupEnabled = false,
+                    DependencyDirs = {
+                        ModRelinker.ManagedDirectory
+                    }
+                };
+
+                Detourer.ReaderParameters.ReadSymbols = false;
+
+                // DON'T. The assembly is already patched with the .mm.dlls in there!
+                // Otherwise this code here wouldn't even run...
+                // Modder.ReadMod(ModRelinker.ManagedDirectory);
+
+                Detourer.Read();
+                Detourer.MapDependencies();
+            } catch (Exception e) {
+                ModLogger.Log("rtpatcher", $"Failed initializing: {e}");
+                return;
+            }
         }
 
         public static void LoadPatch(Stream stream) {
-            // TODO: ModRuntimePatcher
-            // For now just add the PatchDLL to the relink map.
-            using (ModuleDefinition patch = ModuleDefinition.ReadModule(stream))
-                try {
-                    ModLogger.Log("rtpatcher", $"Loading new patch: {patch.Assembly.Name.Name}");
-                    ModRelinker.AssemblyRelinkMap[patch.Assembly.Name.Name] = ModRelinker.AssemblyRelinkedCache["Assembly-CSharp"];
-                } catch (Exception e) {
-                    ModLogger.Log("rtpatcher", $"Failed patching: {e}");
-                    return;
-                }
+            try {
+                ModLogger.Log("rtpatcher", "Loading new patch");
+                Detourer.ReadMod(stream);
+                ModRelinker.AssemblyRelinkMap[Detourer.Mods[Detourer.Mods.Count - 1].Assembly.Name.Name] = ModRelinker.AssemblyRelinkedCache["Assembly-CSharp"];
+                ModLogger.Log("rtpatcher", $"Applied new patch {Detourer.Mods[Detourer.Mods.Count - 1].Assembly.Name.Name}");
+            } catch (Exception e) {
+                ModLogger.Log("rtpatcher", $"Failed patching: {e}");
+                return;
+            }
         }
 
     }

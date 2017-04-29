@@ -93,6 +93,10 @@
       <Name>Assembly-CSharp.Mod.mm</Name>
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Assembly-CSharp.YLFreeCamera.mm\Assembly-CSharp.YLFreeCamera.mm.csproj">
+      <Project>{7d451e58-1086-4740-8fb0-c4b36dcaa227}</Project>
+      <Name>Assembly-CSharp.YLFreeCamera.mm</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
