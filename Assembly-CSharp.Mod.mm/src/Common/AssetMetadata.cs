@@ -4,7 +4,7 @@ using IOFile = System.IO.File;
 using System.Reflection;
 
 /// <summary>
-/// ETGMod asset metadata.
+/// YLMAPI asset metadata.
 /// </summary>
 public class AssetMetadata {
 

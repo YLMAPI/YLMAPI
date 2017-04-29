@@ -356,6 +356,19 @@ namespace YLMAPI {
             return button;
         }
         private static IEnumerator _ListScenes() {
+            /*
+            for (int i = 0; i <= 41; i++) {
+                SButton button = new SButton($"Scene {i}") {
+                    Alignment = TextAnchor.MiddleLeft,
+                    With = { new SFadeInAnimation() },
+                    OnClick = b => {
+                        SceneManager.LoadScene(int.Parse(b.Text.Substring(6)));
+                    }
+                };
+                ScenesGroup.Children.Add(button);
+                yield return null;
+            }
+            */
             using (StreamReader reader = new StreamReader(ModContent.GetMapped("ylmapi/scenes.txt").Stream))
                 while (!reader.EndOfStream) {
                     string line = reader.ReadLine().Trim();
@@ -420,6 +433,20 @@ namespace YLMAPI {
                     RefreshHierarchy();
                 }
             };
+
+            GameObject[] gos = UnityEngine.Object.FindObjectsOfType<GameObject>();
+            ModLogger.Log("main", $"{gos.Length} game objects.");
+            /*
+            int perBatch = gos.Length / 30;
+            for (int i = 0; i < gos.Length; i++) {
+                try {
+                    gos[i].GetOrAddComponent<BoundBoxes_BoundBox>();
+                } catch {
+                }
+                if (i % perBatch == 0)
+                    yield return null;
+            }
+            */
 
             /*
             IEnumerator e = _AddTransformChildrenGroups(null, null);

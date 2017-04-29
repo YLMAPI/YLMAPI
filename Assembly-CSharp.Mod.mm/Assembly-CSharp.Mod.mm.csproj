@@ -75,6 +75,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\Common\AssetMetadata.cs" />
+    <Compile Include="src\Patch\SystemManager.cs" />
+    <Compile Include="src\Third-Party\BoundBoxes_BoundBox.cs" />
+    <Compile Include="src\Third-Party\BoundBoxes_drawLines.cs" />
     <Compile Include="src\Common\LimitedStream.cs" />
     <Compile Include="src\MonoMod\MonoModRules.cs" />
     <Compile Include="src\YLMAPI\GameMod.cs" />
