@@ -71,7 +71,7 @@ namespace YLMAPI {
             }
         }
 
-        public static Assembly GetRelinkedAssembly(this GameModMetadata meta, Stream stream) {
+        public static Assembly GetRelinkedAssembly(this GameModMetadata meta, Stream stream, MissingDependencyResolver depResolver = null) {
             string name = Path.GetFileName(meta.DLL);
             string cachedName = meta.Name + "." + name.Substring(0, name.Length - 3) + "dll";
             string cachedPath = Path.Combine(ModLoader.ModsCacheDirectory, cachedName);
@@ -95,6 +95,10 @@ namespace YLMAPI {
                 checksums.ChecksumsEqual(File.ReadAllLines(cachedChecksumPath)))
                 return Assembly.LoadFrom(cachedPath);
 
+            if (depResolver == null) {
+                depResolver = _GenerateModDependencyResolver(meta);
+            }
+
             using (MonoModder modder = new MonoModder() {
                 Input = stream,
                 OutputPath = cachedPath,
@@ -102,7 +106,9 @@ namespace YLMAPI {
                 RelinkModuleMap = AssemblyRelinkMap,
                 DependencyDirs = {
                     ManagedDirectory
-                }
+                },
+                MissingDependencyResolver = depResolver,
+                RelinkMap = ModRuntimePatcher.Detourer.RelinkMap
             })
                 try {
                     modder.ReaderParameters.ReadSymbols = false;
@@ -119,6 +125,36 @@ namespace YLMAPI {
                 }
 
             return Assembly.LoadFrom(cachedPath);
+        }
+
+
+        private static MissingDependencyResolver _GenerateModDependencyResolver(this GameModMetadata meta) {
+            if (!string.IsNullOrEmpty(meta.Archive)) {
+                return delegate (MonoModder mod, ModuleDefinition main, string name, string fullName) {
+                    string asmName = name + ".dll";
+                    using (ZipFile zip = ZipFile.Read(meta.Archive)) {
+                        foreach (ZipEntry entry in zip.Entries) {
+                            if (entry.FileName != asmName)
+                                continue;
+                            using (MemoryStream ms = new MemoryStream()) {
+                                entry.Extract(ms);
+                                ms.Seek(0, SeekOrigin.Begin);
+                                return ModuleDefinition.ReadModule(ms, mod.GenReaderParameters(false));
+                            }
+                        }
+                    }
+                    return null;
+                };
+            }
+            if (!string.IsNullOrEmpty(meta.Directory)) {
+                return delegate (MonoModder mod, ModuleDefinition main, string name, string fullName) {
+                    string asmPath = Path.Combine(meta.Directory, name + ".dll");
+                    if (!File.Exists(asmPath))
+                        return null;
+                    return ModuleDefinition.ReadModule(asmPath, mod.GenReaderParameters(false, asmPath));
+                };
+            }
+            return null;
         }
 
 

@@ -65,7 +65,6 @@ namespace YLMAPI {
             try {
                 ModLogger.Log("rtpatcher", "Loading new patch");
                 Detourer.ReadMod(stream);
-                ModRelinker.AssemblyRelinkMap[Detourer.Mods[Detourer.Mods.Count - 1].Assembly.Name.Name] = ModRelinker.AssemblyRelinkedCache["Assembly-CSharp"];
                 ModLogger.Log("rtpatcher", $"Applied new patch {Detourer.Mods[Detourer.Mods.Count - 1].Assembly.Name.Name}");
             } catch (Exception e) {
                 ModLogger.Log("rtpatcher", $"Failed patching: {e}");

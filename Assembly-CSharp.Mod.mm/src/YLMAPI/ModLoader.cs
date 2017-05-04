@@ -294,9 +294,8 @@ namespace YLMAPI {
                     string asmName = new AssemblyName(args.Name).Name + ".dll";
                     using (ZipFile zip = ZipFile.Read(meta.Archive)) {
                         foreach (ZipEntry entry in zip.Entries) {
-                            if (entry.FileName != asmName) {
+                            if (entry.FileName != asmName)
                                 continue;
-                            }
                             using (MemoryStream ms = new MemoryStream()) {
                                 entry.Extract(ms);
                                 ms.Seek(0, SeekOrigin.Begin);
@@ -310,9 +309,8 @@ namespace YLMAPI {
             if (!string.IsNullOrEmpty(meta.Directory)) {
                 return delegate (object sender, ResolveEventArgs args) {
                     string asmPath = Path.Combine(meta.Directory, new AssemblyName(args.Name).Name + ".dll");
-                    if (!File.Exists(asmPath)) {
+                    if (!File.Exists(asmPath))
                         return null;
-                    }
                     return Assembly.LoadFrom(asmPath);
                 };
             }
