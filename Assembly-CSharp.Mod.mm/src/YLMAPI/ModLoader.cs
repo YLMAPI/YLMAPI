@@ -14,6 +14,7 @@ using System.Linq;
 using Ionic.Zip;
 using MonoMod.InlineRT;
 using ReflectionHelper = MonoMod.InlineRT.ReflectionHelper;
+using YLMAPI.Content;
 
 namespace YLMAPI {
     public static class ModLoader {
@@ -160,7 +161,7 @@ namespace YLMAPI {
                         }
                     } else {
                         ModContent.AddMapping(entryName, new AssetMetadata(archive, entryName) {
-                            AssetType = entry.IsDirectory ? typeof(ModContent.AssetDirectory) : null
+                            AssetType = entry.IsDirectory ? typeof(AssetTypeDirectory) : null
                         });
                     }
                 }

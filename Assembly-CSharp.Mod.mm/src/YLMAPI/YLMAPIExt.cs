@@ -5,6 +5,7 @@ using System;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using YLMAPI;
+using System.IO;
 
 public static class YLMAPIExt {
 
@@ -41,6 +42,12 @@ public static class YLMAPIExt {
         for (int i = 0; i < count; i++)
             a(t.GetChild(i).gameObject);
     }
+
+    public static string NormalizePath(this string s)
+        => s; // s.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
+
+    public static string EmptyToNull(this string s)
+        => string.IsNullOrEmpty(s) ? null : s;
 
     public static Dictionary<string, Text> GetTexts(this GameObject go) {
         return GetTexts(go.transform);

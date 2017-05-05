@@ -7,6 +7,7 @@ using SGUI;
 using System.IO;
 using UnityEngine.SceneManagement;
 using System.Reflection;
+using YLMAPI.Content;
 
 namespace YLMAPI {
     public static class ModGUI {

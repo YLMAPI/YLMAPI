@@ -10,6 +10,7 @@ using Rewired;
 using UEInput = UnityEngine.Input;
 using System.IO;
 using System.Reflection;
+using YLMAPI.Content;
 
 namespace YLMAPI {
     public static class ModAPI {
@@ -64,8 +65,8 @@ namespace YLMAPI {
             GameDirectory = Path.GetDirectoryName(Path.GetFullPath(Application.dataPath));
             Console.WriteLine($"Game directory: {GameDirectory}");
 
-            SceneManager.sceneLoaded += OnSceneLoaded;
-            SceneManager.sceneUnloaded += OnSceneUnloaded;
+            SceneManager.sceneLoaded += OnUnitySceneLoaded;
+            SceneManager.sceneUnloaded += OnUnitySceneUnloaded;
 
             ModEvents.OnLateUpdate += ModInput.LateUpdate;
 
@@ -74,17 +75,20 @@ namespace YLMAPI {
 
             ModGUI.Init();
 
+            ModContent.Init();
+
             ModRuntimePatcher.Init();
             ModLoader.LoadMods();
             ModLoader.Invoke("Init");
         }
 
-        public static void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
+        public static void OnUnitySceneLoaded(Scene scene, LoadSceneMode mode) {
             ModLogger.Log("main", $"Loaded scene: {scene.name}");
             // scene.OnLoadFinished(s => Console.WriteLine(s.DumpHierarchy(new StringBuilder()).ToString()));
+            scene.OnLoadFinished(s => ModContentDumper.DumpContent().StartGlobal());
         }
 
-        public static void OnSceneUnloaded(Scene scene) {
+        public static void OnUnitySceneUnloaded(Scene scene) {
             ModLogger.Log("main", $"Unloaded scene: {scene.name}");
         }
 

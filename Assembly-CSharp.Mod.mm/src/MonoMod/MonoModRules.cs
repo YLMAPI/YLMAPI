@@ -10,7 +10,7 @@ namespace MonoMod {
     /// This single class gets stripped out and executed by MonoMod when injecting.
     /// It allows mod-time configuration.
     /// </summary>
-    internal static class MonoModRules {
+    internal static partial class MonoModRules {
         
         static MonoModRules() {
             // YLMAPI is accessing MonoMod. Tell MonoMod not to remove any MonoMod references.

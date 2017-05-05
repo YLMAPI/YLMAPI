@@ -15,7 +15,9 @@ namespace YLMAPI {
     public static class ModLogger {
 
         public static void Log(string tag, string str) {
-            Console.Write("[YLMod] [");
+            Console.Write("(");
+            Console.Write(DateTime.Now);
+            Console.Write(") [YLMod] [");
             Console.Write(tag);
             Console.Write("] ");
             Console.WriteLine(str);

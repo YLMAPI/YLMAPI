@@ -76,11 +76,17 @@
   <ItemGroup>
     <Compile Include="src\Common\AssetMetadata.cs" />
     <Compile Include="src\Patch\SystemManager.cs" />
+    <Compile Include="src\Patch\SavegameManager.cs" />
     <Compile Include="src\Third-Party\BoundBoxes_BoundBox.cs" />
     <Compile Include="src\Third-Party\BoundBoxes_drawLines.cs" />
     <Compile Include="src\Common\LimitedStream.cs" />
     <Compile Include="src\MonoMod\MonoModRules.cs" />
+    <Compile Include="src\YLMAPI\Content\AssetTypes.cs" />
+    <Compile Include="src\YLMAPI\Content\ModContentPatcher.cs" />
     <Compile Include="src\YLMAPI\GameMod.cs" />
+    <Compile Include="src\YLMAPI\Content\ModContentExt.cs" />
+    <Compile Include="src\YLMAPI\Content\ModContentDumper.cs" />
+    <Compile Include="src\YLMAPI\Content\ModContentWrapper.cs" />
     <Compile Include="src\YLMAPI\ModRuntimePatcher.cs" />
     <Compile Include="src\YLMAPI\ModRuntimePatcher_MMHarmony.cs" />
     <Compile Include="src\YLMAPI\ModRelinker.cs" />
@@ -92,7 +98,7 @@
     <Compile Include="src\SGUIExt\SGroupForceScrollModifier.cs" />
     <Compile Include="src\SGUIExt\SCheckboxModifier.cs" />
     <Compile Include="src\YLMAPI\ModLogger.cs" />
-    <Compile Include="src\YLMAPI\ModContent.cs" />
+    <Compile Include="src\YLMAPI\Content\ModContent.cs" />
     <Compile Include="src\YLMAPI\ModInput.cs" />
     <Compile Include="src\MonoMod\MMILAccessExample.cs" />
     <Compile Include="src\YLMAPI\YLMAPIMenuExt.cs" />

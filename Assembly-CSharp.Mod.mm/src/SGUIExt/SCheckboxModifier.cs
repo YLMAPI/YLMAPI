@@ -2,6 +2,7 @@
 using System.Text;
 using UnityEngine;
 using YLMAPI;
+using YLMAPI.Content;
 
 namespace SGUI {
     public class SCheckboxModifier : SModifier {

@@ -10,14 +10,13 @@ using Rewired;
 using UEInput = UnityEngine.Input;
 using System.IO;
 using System.Reflection;
+using MonoMod.Detour;
 
-namespace YLMAPI {
-    public static partial class ModContent {
-
-        public sealed class AssetDirectory { private AssetDirectory() { } }
-        public sealed class AssetAssembly { private AssetAssembly() { } }
+namespace YLMAPI.Content {
+    public static class ModContent {
 
         public static string ContentDirectory;
+        public static string PatchesDirectory;
         public static string TextsDirectory;
 
         public readonly static Dictionary<string, AssetMetadata> Map = new Dictionary<string, AssetMetadata>();
@@ -28,58 +27,28 @@ namespace YLMAPI {
             typeof(Texture2D)
         };
 
+        public static bool IsInitialized { get; internal set; }
+
         static ModContent() {
+            Init();
+        }
+        public static void Init() {
+            if (IsInitialized)
+                return;
+
             Directory.CreateDirectory(ContentDirectory = Path.Combine(ModAPI.GameDirectory, "Content"));
+            Directory.CreateDirectory(PatchesDirectory = Path.Combine(ContentDirectory, "Patches"));
             Directory.CreateDirectory(TextsDirectory = Path.Combine(ContentDirectory, "Texts"));
 
             Crawl(Assembly.GetExecutingAssembly());
             Crawl(ContentDirectory);
 
-            ModEvents.OnTextsLoaded += (tm, tables, stringData) => {
-                for (int i = 0; i < stringData.Length; i++) {
-                    string[] strings = stringData[i];
-                    if (strings == null) // Who knows?
-                        continue;
-                    string key = tables[i] ?? $"texts_{i}";
+            d_LoadHook t_LoadHook = 
+                typeof(Resources).GetMethod("Load", new Type[] { typeof(string), typeof(Type) })
+                    .Detour<d_LoadHook>(typeof(ModContent).GetMethod("LoadHook"));
+            typeof(ModContent).GetMethod("trampoline_LoadHook").Detour(t_LoadHook);
 
-                    string file = Path.Combine(TextsDirectory, tm.GetLocale());
-                    Directory.CreateDirectory(file);
-                    file = Path.Combine(file, key + ".txt");
-                    if (!File.Exists(file)) {
-                        using (StreamWriter writer = new StreamWriter(file))
-                            for (int j = 0; j < strings.Length; j++)
-                                writer.WriteLine($"{j}: {strings[j]}");
-                    } else {
-                        int index = -1;
-                        string text = "";
-                        using (StreamReader reader = new StreamReader(file))
-                            while (!reader.EndOfStream) {
-                                string line = reader.ReadLine();
-                                if (line.StartsWith("#"))
-                                    continue;
-                                int indexOfColon = line.IndexOf(':');
-                                if (indexOfColon <= 0) {
-                                    text += "\n" + line;
-                                    continue;
-                                }
-                                int indexOld = index;
-                                if (!int.TryParse(line.Substring(0, indexOfColon), out index)) {
-                                    index = -1;
-                                    text += "\n" + line;
-                                    continue;
-                                }
-                                if (indexOld != -1)
-                                    strings[indexOld] = text;
-                                if (indexOfColon + 2 > line.Length)
-                                    text = "";
-                                else
-                                    text = line.Substring(indexOfColon + 2);
-                            }
-                        if (index != -1)
-                            strings[index] = text;
-                    }
-                }
-            };
+            ModContentPatcher.Init();
         }
 
         public static bool TryGetMapped(string path, out AssetMetadata metadata, bool includeDirs = false) {
@@ -102,7 +71,7 @@ namespace YLMAPI {
             path = path.Replace('\\', '/');
             if (metadata.AssetType == null)
                 path = RemoveExtension(path, out metadata.AssetType);
-            if (metadata.AssetType == typeof(AssetDirectory))
+            if (metadata.AssetType == typeof(AssetTypeDirectory))
                 return MapDirs[path] = metadata;
 
             return Map[path] = metadata;
@@ -112,7 +81,7 @@ namespace YLMAPI {
             type = typeof(object);
 
             if (file.EndsWith(".dll")) {
-                type = typeof(AssetAssembly);
+                type = typeof(AssetTypeAssembly);
 
             } else if (file.EndsWith(".png")) {
                 type = typeof(Texture2D);
@@ -123,8 +92,10 @@ namespace YLMAPI {
         }
 
         public static void Crawl(string dir, string root = null) {
-            if (Path.GetDirectoryName(dir).StartsWith("DUMP")) return;
-            if (root == null) root = dir;
+            if (Path.GetDirectoryName(dir).StartsWith("DUMP"))
+                return;
+            if (root == null)
+                root = dir;
             string[] files = Directory.GetFiles(dir);
             for (int i = 0; i < files.Length; i++) {
                 string file = files[i];
@@ -134,7 +105,7 @@ namespace YLMAPI {
             for (int i = 0; i < files.Length; i++) {
                 string file = files[i];
                 AddMapping(file.Substring((root?.Length ?? 0) + 1), new AssetMetadata(file) {
-                    AssetType = typeof(AssetDirectory),
+                    AssetType = typeof(AssetTypeDirectory),
                     HasData = false
                 });
                 Crawl(file, root);
@@ -152,6 +123,20 @@ namespace YLMAPI {
                 AddMapping(name, new AssetMetadata(asm, resourceNames[i]));
             }
         }
+
+        internal delegate UnityEngine.Object d_LoadHook(string path, Type type);
+        public static UnityEngine.Object trampoline_LoadHook(string path, Type type) { return null; }
+        public static UnityEngine.Object LoadHook(string path, Type type) {
+            Console.WriteLine($"Loading: {path} ({type})");
+            Console.WriteLine(Environment.StackTrace);
+            object value = Load(path, type);
+            if (value == null)
+                return trampoline_LoadHook(path, type);
+            if (value is UnityEngine.Object)
+                return (UnityEngine.Object) value;
+            return new ModContentWrapper(value, type);
+        }
+
 
         public static T Load<T>(string path)
             => (T) Load(path, typeof(T));
