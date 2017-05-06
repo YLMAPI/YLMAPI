@@ -101,10 +101,11 @@
     <Compile Include="src\YLMAPI\Content\ModContent.cs" />
     <Compile Include="src\YLMAPI\ModInput.cs" />
     <Compile Include="src\MonoMod\MMILAccessExample.cs" />
+    <Compile Include="src\YLMAPI\YLMAPIEnumerators.cs" />
     <Compile Include="src\YLMAPI\YLMAPIMenuExt.cs" />
     <Compile Include="src\Patch\FrontendMainScreenController.cs" />
     <Compile Include="src\Patch\PlayerInputStore.cs" />
-    <Compile Include="src\Common\UnityEnumerator.cs" />
+    <Compile Include="src\Common\UnityEnumerators.cs" />
     <Compile Include="src\YLMAPI\ModAPI.cs" />
     <Compile Include="src\YLMAPI\YLMAPIExt.cs" />
     <Compile Include="src\YLMAPI\YLMAPIInternalExt.cs" />

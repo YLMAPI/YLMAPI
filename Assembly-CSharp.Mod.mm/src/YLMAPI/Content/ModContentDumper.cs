@@ -57,10 +57,14 @@ namespace YLMAPI.Content {
         private static SLabel _DumpingUILabel = (SLabel) _DumpingUI[1];
         private static SImage _DumpingUIBar = (SImage) _DumpingUI[2];
 
-        public static IEnumerator DumpContent() {
-            Scene scene = SceneManager.GetActiveScene();
+        public static IEnumerator DumpContent(Scene scene) {
             ModLogger.Log("dump", $"Dumping scene: {scene.name}");
+            Scene scenePrev = SceneManager.GetActiveScene();
+            if (scenePrev != scene)
+                SceneManager.SetActiveScene(scene);
             GameObject[] objs = UnityEngine.Object.FindObjectsOfType<GameObject>();
+            if (scenePrev != scene)
+                SceneManager.SetActiveScene(scenePrev);
             _DumpingUILabel.Text = string.Format(_DumpingUIFormat, "", 0, objs.Length);
             _DumpingUIBar.Size.x = 0;
             _DumpingUI.Visible = true;

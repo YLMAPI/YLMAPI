@@ -61,8 +61,8 @@ namespace YLMAPI {
         /// Allows you to change the scene after it has been loaded, but before the loading screen finishes.
         /// </summary>
         public static Func<IEnumerator, Scene, IEnumerator> OnProcessScene;
-        public static IEnumerator ProcessScene(Scene scene)
-            => OnProcessScene?.InvokePassing((IEnumerator) null, scene);
+        public static IEnumerator ProcessScene(IEnumerator loader, Scene scene)
+            => OnProcessScene?.InvokePassing(loader, scene) ?? loader;
 
     }
 

@@ -65,8 +65,8 @@ namespace YLMAPI {
             GameDirectory = Path.GetDirectoryName(Path.GetFullPath(Application.dataPath));
             Console.WriteLine($"Game directory: {GameDirectory}");
 
-            SceneManager.sceneLoaded += OnUnitySceneLoaded;
-            SceneManager.sceneUnloaded += OnUnitySceneUnloaded;
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            SceneManager.sceneUnloaded += OnSceneUnloaded;
 
             ModEvents.OnLateUpdate += ModInput.LateUpdate;
 
@@ -82,16 +82,25 @@ namespace YLMAPI {
             ModLoader.Invoke("Init");
         }
 
-        public static void OnUnitySceneLoaded(Scene scene, LoadSceneMode mode) {
+        private static bool _WasLoadingScreen = false;
+        private static bool _IsLoadingScreen = false;
+        public static void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
             ModLogger.Log("main", $"Loaded scene: {scene.name}");
-            // scene.OnLoadFinished(s => Console.WriteLine(s.DumpHierarchy(new StringBuilder()).ToString()));
-            // scene.OnLoadFinished(s => ModContentDumper.DumpContent().StartGlobal());
-            // FIXME: This triggers past LoadingScreen_Bounce because OnUnitySceneLoaded seems to actually be OnUnitySceneActivated
-            if (SceneManager.GetActiveScene().name != "LoadingScreen_Bounce")
+
+            _WasLoadingScreen = _IsLoadingScreen;
+            _IsLoadingScreen = scene.name == "LoadingScreen";
+            if (!_IsLoadingScreen && _WasLoadingScreen) {
+                // Normal loading screen procedure.
+            } else if (!_IsLoadingScreen && !_WasLoadingScreen) {
+                // Skipped loading screen?
                 ModContentPatcher.PatchContent(scene).StartGlobal();
+            }
+
+            // scene.OnLoadFinished(s => Console.WriteLine(s.DumpHierarchy(new StringBuilder()).ToString()));
+            // scene.OnLoadFinished(s => ModContentDumper.DumpContent(scene).StartGlobal());
         }
 
-        public static void OnUnitySceneUnloaded(Scene scene) {
+        public static void OnSceneUnloaded(Scene scene) {
             ModLogger.Log("main", $"Unloaded scene: {scene.name}");
         }
 

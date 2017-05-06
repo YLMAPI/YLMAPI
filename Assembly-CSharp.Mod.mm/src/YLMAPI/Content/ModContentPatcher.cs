@@ -27,6 +27,7 @@ namespace YLMAPI.Content {
         public static void Init() {
             if (IsInitialized)
                 return;
+            IsInitialized = true;
 
             ModEvents.OnTextsLoaded += OnTextsLoaded;
             ModEvents.OnLoadSceneControl += OnLoadSceneControl;
@@ -36,7 +37,7 @@ namespace YLMAPI.Content {
         public static void OnTextsLoaded(TextManager tm, string[] tables, string[][] stringData) {
             for (int i = 0; i < stringData.Length; i++) {
                 string[] strings = stringData[i];
-                if (strings == null) // Who knows?
+                if (strings == null)
                     continue;
                 string key = tables[i] ?? $"texts_{i}";
 
@@ -79,34 +80,32 @@ namespace YLMAPI.Content {
             }
         }
 
-        public static IEnumerator OnLoadSceneControl(IEnumerator loader, string sceneName, LoadingScreenFade fadeMask) {
-            Scene scenePrev = SceneManager.GetActiveScene();
-            while (loader.MoveNext()) {
-                object current = loader.Current;
-                if (current == Yielders.EndOfFrame) {
-                    Scene scene = SceneManager.GetActiveScene();
-                    IEnumerator ie = ModEvents.ProcessScene(scene);
-                    // This here seems to fail - find a better way to hook.
-                    SceneManager.SetActiveScene(scenePrev);
-                    if (ie != null)
-                        yield return ie;
-                    SceneManager.SetActiveScene(scene);
-                }
-
-                yield return current;
-            }
-        }
+        public static IEnumerator OnLoadSceneControl(IEnumerator loader, string sceneName, LoadingScreenFade fadeMask)
+            => new SceneLoadWrapper(loader, sceneName, ModEvents.ProcessScene);
 
         public static IEnumerator OnProcessScene(IEnumerator loader, Scene scene) {
-            if (loader != null)
-                yield return loader;
+            // The loading screen is so finetuned, adding just one yield return null causes the lighting to break!
+            // We need to work around this.
 
-            ModLogger.Log("main", $"OnProcessScene: {scene.name}");
-            // yield return ModContentDumper.DumpContent(scene);
+            float scale = Time.timeScale;
+            Time.timeScale = 0f; // This also affects the loading screen background!
+
+            Scene scenePrev = SceneManager.GetActiveScene();
+            SceneManager.SetActiveScene(scene);
+            yield return null;
+            SceneManager.SetActiveScene(scenePrev);
+
             yield return PatchContent(scene);
+
+            Time.timeScale = scale;
+            
+            yield return loader;
         }
 
         public static IEnumerator PatchContent(Scene scene) {
+            yield return ModContentDumper.DumpContent(scene);
+            yield break;
+
             ModLogger.Log("content", $"Patching scene content: {scene.name}");
             Scene scenePrev = SceneManager.GetActiveScene();
             if (scenePrev != scene)

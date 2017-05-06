@@ -35,6 +35,7 @@ namespace YLMAPI.Content {
         public static void Init() {
             if (IsInitialized)
                 return;
+            IsInitialized = true;
 
             Directory.CreateDirectory(ContentDirectory = Path.Combine(ModAPI.GameDirectory, "Content"));
             Directory.CreateDirectory(PatchesDirectory = Path.Combine(ContentDirectory, "Patches"));
@@ -43,10 +44,9 @@ namespace YLMAPI.Content {
             Crawl(Assembly.GetExecutingAssembly());
             Crawl(ContentDirectory);
 
-            d_LoadHook t_LoadHook = 
-                typeof(Resources).GetMethod("Load", new Type[] { typeof(string), typeof(Type) })
-                    .Detour<d_LoadHook>(typeof(ModContent).GetMethod("LoadHook"));
-            typeof(ModContent).GetMethod("trampoline_LoadHook").Detour(t_LoadHook);
+            MethodInfo m_Resources_Load = typeof(Resources).GetMethod("Load", new Type[] { typeof(string), typeof(Type) });
+            m_Resources_Load.Detour(typeof(ModContent).GetMethod("LoadHook"));
+            typeof(ModContent).GetMethod("trampoline_LoadHook").Detour(m_Resources_Load.CreateOrigTrampoline());
 
             ModContentPatcher.Init();
         }
@@ -127,8 +127,6 @@ namespace YLMAPI.Content {
         internal delegate UnityEngine.Object d_LoadHook(string path, Type type);
         public static UnityEngine.Object trampoline_LoadHook(string path, Type type) { return null; }
         public static UnityEngine.Object LoadHook(string path, Type type) {
-            Console.WriteLine($"Loading: {path} ({type})");
-            Console.WriteLine(Environment.StackTrace);
             object value = Load(path, type);
             if (value == null)
                 return trampoline_LoadHook(path, type);
