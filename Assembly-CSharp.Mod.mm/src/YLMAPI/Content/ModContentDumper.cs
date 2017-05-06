@@ -18,7 +18,8 @@ namespace YLMAPI.Content {
         public static string DumpDirectory = Path.Combine(ModContent.ContentDirectory, "DUMP");
 
         private static int _DumpedThisFrame = 0;
-        private const int _DumpsPerFrame = 4;
+        private const int _DumpsPerFrame = 16;
+        private const int _MaxDumpsPerFrame = 64;
 
         private const string _DumpingUIFormat = "Currently dumping {1} of {2}: {0}";
         private static SGroup _DumpingUI = new SGroup() {
@@ -65,9 +66,9 @@ namespace YLMAPI.Content {
             _DumpingUI.Visible = true;
             for (int i = 0; i < objs.Length; i++)
                 if (objs[i] != null) {
-                    DumpContent(objs[i].transform);
-                    _DumpedThisFrame++;
-                    if (_DumpedThisFrame >= _DumpsPerFrame) {
+                    if (DumpContent(objs[i].transform))
+                        _DumpedThisFrame++;
+                    if (_DumpedThisFrame >= _DumpsPerFrame || i % _MaxDumpsPerFrame == 0) {
                         _DumpedThisFrame = 0;
                         _DumpingUILabel.Text = string.Format(_DumpingUIFormat, objs[i].name, i, objs.Length);
                         _DumpingUIBar.Size.x = ((float) i / objs.Length) * _DumpingUI.Size.x;
@@ -77,9 +78,11 @@ namespace YLMAPI.Content {
             _DumpingUI.Visible = false;
         }
 
-        public static void DumpContent(Transform t) {
+        public static bool DumpContent(Transform t) {
             if (t == null)
-                return;
+                return false;
+
+            bool dumped = false;
 
             string prefix = t.name.Trim();
             int prefixTrimIndex = prefix.IndexOf(' ');
@@ -89,24 +92,31 @@ namespace YLMAPI.Content {
 
             Component[] components = t.GetComponents<Component>();
             for (int ci = 0; ci < components.Length; ci++)
-                DumpContent(components[ci], prefix);
+                dumped |= DumpContent(components[ci], prefix);
+
+            return dumped;
         }
 
-        public static void DumpContent(Component c, string prefix = "") {
+        public static bool DumpContent(Component c, string prefix = "") {
             prefix = $"{prefix}{c.GetType().Name}.";
 
             if (c is Renderer)
-                DumpContent(c, ((Renderer) c).sharedMaterials, prefix);
+                return DumpContent(c, ((Renderer) c).sharedMaterials, prefix);
+
+            return false;
         }
 
-        public static void DumpContent(Component c, Material[] materials, string prefix = "") {
+        public static bool DumpContent(Component c, Material[] materials, string prefix = "") {
+            bool dumped = false;
             for (int mi = 0; mi < materials.Length; mi++)
-                DumpContent(c, materials[mi], prefix);
+                dumped |= DumpContent(c, materials[mi], prefix);
+            return dumped;
         }
 
-        public static void DumpContent(Component c, Material material, string prefix = "") {
+        public static bool DumpContent(Component c, Material material, string prefix = "") {
             if (material == null)
-                return;
+                return false;
+            bool dumped = false;
 
             prefix = $"{prefix}{material.name}";
 
@@ -117,22 +127,33 @@ namespace YLMAPI.Content {
                     suffix = tex.name.EmptyToNull() ?? ".main";
                 if (suffix.StartsWith(material.name))
                     suffix = suffix.Substring(material.name.Length);
-                DumpContent(tex, prefix + suffix + ".png");
+                dumped |= DumpContent(tex, prefix + suffix);
             }
+
+            return dumped;
         }
 
-        public static void DumpContent(Texture2D tex, string path) {
+        public static bool DumpContent(Texture2D tex, string path) {
             if (tex == null)
-                return;
-            tex = tex.GetRW();
-            // TODO: This may break future loading.
+                return false;
+
             if (!string.IsNullOrEmpty(tex.name))
-                path = Path.Combine("Textures", tex.name + ".png");
-            path = Path.Combine(DumpDirectory, path.NormalizePath());
+                path = Path.Combine("Textures", tex.name);
+            path = Path.Combine(DumpDirectory, path.NormalizePath() + ".png");
             if (File.Exists(path))
-                return;
+                return false;
+
+            bool copied = !tex.IsReadable();
+            if (copied)
+                tex = tex.GetRW();
+
             Directory.CreateDirectory(Path.GetDirectoryName(path));
             File.WriteAllBytes(path, tex.EncodeToPNG());
+
+            if (copied)
+                UnityEngine.Object.DestroyImmediate(tex);
+
+            return true;
         }
 
     }

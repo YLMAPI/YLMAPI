@@ -43,8 +43,21 @@ public static class YLMAPIExt {
             a(t.GetChild(i).gameObject);
     }
 
-    public static string NormalizePath(this string s)
-        => s; // s.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
+    public static string NormalizePath(this string s) {
+        s = s.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
+
+        RemoveSuffix:
+        if (s.EndsWith("(Clone)")) {
+            s = s.Substring(0, s.Length - 7);
+            goto RemoveSuffix;
+        }
+        if (s.EndsWith("(Instance)")) {
+            s = s.Substring(0, s.Length - 10);
+            goto RemoveSuffix;
+        }
+
+        return s;
+    }
 
     public static string EmptyToNull(this string s)
         => string.IsNullOrEmpty(s) ? null : s;

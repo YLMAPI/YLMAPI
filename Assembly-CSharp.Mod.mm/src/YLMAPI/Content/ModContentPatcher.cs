@@ -15,6 +15,10 @@ using MonoMod.Detour;
 namespace YLMAPI.Content {
     public static class ModContentPatcher {
 
+        private static int _PatchedThisFrame = 0;
+        private const int _PatchesPerFrame = 16;
+        private const int _MaxPatchesPerFrame = 64;
+
         public static bool IsInitialized { get; internal set; }
 
         static ModContentPatcher() {
@@ -76,10 +80,19 @@ namespace YLMAPI.Content {
         }
 
         public static IEnumerator OnLoadSceneControl(IEnumerator loader, string sceneName, LoadingScreenFade fadeMask) {
+            Scene scenePrev = SceneManager.GetActiveScene();
             while (loader.MoveNext()) {
                 object current = loader.Current;
-                if (current == Yielders.EndOfFrame)
-                    yield return ModEvents.ProcessScene(SceneManager.GetSceneByName(sceneName)) ?? current;
+                if (current == Yielders.EndOfFrame) {
+                    Scene scene = SceneManager.GetActiveScene();
+                    IEnumerator ie = ModEvents.ProcessScene(scene);
+                    // This here seems to fail - find a better way to hook.
+                    SceneManager.SetActiveScene(scenePrev);
+                    if (ie != null)
+                        yield return ie;
+                    SceneManager.SetActiveScene(scene);
+                }
+
                 yield return current;
             }
         }
@@ -87,18 +100,37 @@ namespace YLMAPI.Content {
         public static IEnumerator OnProcessScene(IEnumerator loader, Scene scene) {
             if (loader != null)
                 yield return loader;
+
             ModLogger.Log("main", $"OnProcessScene: {scene.name}");
             // yield return ModContentDumper.DumpContent(scene);
-            // PatchContent(scene);
+            yield return PatchContent(scene);
         }
 
-        public static void PatchContent(Scene scene) {
-            GameObject[] roots = scene.GetRootGameObjects();
-            for (int i = 0; i < roots.Length; i++)
-                PatchContent(roots[i].transform);
+        public static IEnumerator PatchContent(Scene scene) {
+            ModLogger.Log("content", $"Patching scene content: {scene.name}");
+            Scene scenePrev = SceneManager.GetActiveScene();
+            if (scenePrev != scene)
+                SceneManager.SetActiveScene(scene);
+            GameObject[] objs = UnityEngine.Object.FindObjectsOfType<GameObject>();
+            if (scenePrev != scene)
+                SceneManager.SetActiveScene(scenePrev);
+            for (int i = 0; i < objs.Length; i++)
+                if (objs[i] != null) {
+                    if (PatchContent(objs[i].transform))
+                        _PatchedThisFrame++;
+                    if (_PatchedThisFrame >= _PatchesPerFrame || i % _MaxPatchesPerFrame == 0) {
+                        _PatchedThisFrame = 0;
+                        yield return null;
+                    }
+                }
         }
 
-        public static void PatchContent(Transform t) {
+        public static bool PatchContent(Transform t) {
+            if (t == null)
+                return false;
+
+            bool patched = false;
+
             string prefix = t.name.Trim();
             int prefixTrimIndex = prefix.IndexOf(' ');
             if (prefixTrimIndex != -1)
@@ -107,50 +139,65 @@ namespace YLMAPI.Content {
 
             Component[] components = t.GetComponents<Component>();
             for (int ci = 0; ci < components.Length; ci++)
-                PatchContent(components[ci], prefix);
+                patched |= PatchContent(components[ci], prefix);
 
-            int children = t.childCount;
-            for (int ci = 0; ci < children; ci++)
-                PatchContent(t.GetChild(ci));
+            return patched;
         }
 
-        public static void PatchContent(Component c, string prefix = "") {
+        public static bool PatchContent(Component c, string prefix = "") {
             prefix = $"{prefix}{c.GetType().Name}";
 
             if (c is Renderer)
-                PatchContent(c, ((Renderer) c).sharedMaterials, prefix);
+                return PatchContent(c, ((Renderer) c).sharedMaterials, prefix);
+
+            return false;
         }
 
-        public static void PatchContent(Component c, Material[] materials, string prefix = "") {
+        public static bool PatchContent(Component c, Material[] materials, string prefix = "") {
+            bool patched = false;
             for (int mi = 0; mi < materials.Length; mi++)
-                PatchContent(c, materials[mi], $"{prefix}_");
+                patched |= PatchContent(c, materials[mi], prefix);
+            return patched;
         }
 
-        public static void PatchContent(Component c, Material material, string prefix = "") {
+        public static bool PatchContent(Component c, Material material, string prefix = "") {
             if (material == null)
-                return;
+                return false;
+            bool patched = false;
 
             prefix = $"{prefix}{material.name}";
 
             Texture2D tex = material.mainTexture as Texture2D;
             if (tex != null) {
-                string path = prefix;
+                string suffix = "";
                 if (material.name != tex.name)
-                    path = $"{path}.{tex.name.EmptyToNull() ?? "main"}";
-                path = path + ".png";
-                PatchContent(ref tex, path);
+                    suffix = tex.name.EmptyToNull() ?? ".main";
+                if (suffix.StartsWith(material.name))
+                    suffix = suffix.Substring(material.name.Length);
+                patched |= PatchContent(ref tex, prefix + suffix);
                 material.mainTexture = tex;
             }
+
+            return patched;
         }
 
-        public static void PatchContent(ref Texture2D tex, string path) {
+        public static bool PatchContent(ref Texture2D tex, string path) {
             if (tex == null)
-                return;
-            tex = tex.GetRW();
-
-            path = Path.Combine(ModContent.PatchesDirectory, path.NormalizePath());
+                return false;
+            if (!string.IsNullOrEmpty(tex.name))
+                path = Path.Combine("Textures", tex.name);
+            path = Path.Combine(ModContent.PatchesDirectory, path.NormalizePath() + ".png");
             if (!File.Exists(path))
-                return;
+                return false;
+
+            bool copied = !tex.IsReadable();
+            if (copied)
+                tex = tex.GetRW();
+
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            File.WriteAllBytes(path, tex.EncodeToPNG());
+
+            return true;
         }
 
     }

@@ -85,7 +85,10 @@ namespace YLMAPI {
         public static void OnUnitySceneLoaded(Scene scene, LoadSceneMode mode) {
             ModLogger.Log("main", $"Loaded scene: {scene.name}");
             // scene.OnLoadFinished(s => Console.WriteLine(s.DumpHierarchy(new StringBuilder()).ToString()));
-            scene.OnLoadFinished(s => ModContentDumper.DumpContent().StartGlobal());
+            // scene.OnLoadFinished(s => ModContentDumper.DumpContent().StartGlobal());
+            // FIXME: This triggers past LoadingScreen_Bounce because OnUnitySceneLoaded seems to actually be OnUnitySceneActivated
+            if (SceneManager.GetActiveScene().name != "LoadingScreen_Bounce")
+                ModContentPatcher.PatchContent(scene).StartGlobal();
         }
 
         public static void OnUnitySceneUnloaded(Scene scene) {
