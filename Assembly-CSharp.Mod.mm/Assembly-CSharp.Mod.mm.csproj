@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\Common\AssetMetadata.cs" />
+    <Compile Include="src\Common\SceneFreezeInfo.cs" />
     <Compile Include="src\Patch\SystemManager.cs" />
     <Compile Include="src\Patch\SavegameManager.cs" />
     <Compile Include="src\Third-Party\BoundBoxes_BoundBox.cs" />

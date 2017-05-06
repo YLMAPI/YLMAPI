@@ -87,8 +87,7 @@ namespace YLMAPI.Content {
             // The loading screen is so finetuned, adding just one yield return null causes the lighting to break!
             // We need to work around this.
 
-            float scale = Time.timeScale;
-            Time.timeScale = 0f; // This also affects the loading screen background!
+            SceneFreezeInfo freeze = scene.Freeze();
 
             Scene scenePrev = SceneManager.GetActiveScene();
             SceneManager.SetActiveScene(scene);
@@ -97,7 +96,7 @@ namespace YLMAPI.Content {
 
             yield return PatchContent(scene);
 
-            Time.timeScale = scale;
+            freeze.Unfreeze();
             
             yield return loader;
         }
