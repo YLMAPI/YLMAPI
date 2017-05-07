@@ -17,7 +17,7 @@ namespace YLMAPI.Content {
 
         private static int _PatchedThisFrame = 0;
         private const int _PatchesPerFrame = 16;
-        private const int _MaxPatchesPerFrame = 64;
+        private const int _MaxPatchesPerFrame = 128;
 
         public static bool IsInitialized { get; internal set; }
 
@@ -107,13 +107,19 @@ namespace YLMAPI.Content {
 
             ModLogger.Log("content", $"Patching scene content: {scene.name}");
             Scene scenePrev = SceneManager.GetActiveScene();
-            if (scenePrev != scene)
+            if (scenePrev != scene) {
                 SceneManager.SetActiveScene(scene);
-            GameObject[] objs = UnityEngine.Object.FindObjectsOfType<GameObject>();
-            if (scenePrev != scene)
+                yield return null;
+            }
+            GameObject[] objs = Resources.FindObjectsOfTypeAll<GameObject>();
+            if (scenePrev != scene) {
                 SceneManager.SetActiveScene(scenePrev);
+                yield return null;
+            }
             for (int i = 0; i < objs.Length; i++)
                 if (objs[i] != null) {
+                    if (objs[i].scene != scene)
+                        continue;
                     if (PatchContent(objs[i].transform))
                         _PatchedThisFrame++;
                     if (_PatchedThisFrame >= _PatchesPerFrame || i % _MaxPatchesPerFrame == 0) {

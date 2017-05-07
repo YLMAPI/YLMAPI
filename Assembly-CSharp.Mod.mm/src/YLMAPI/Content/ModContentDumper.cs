@@ -19,7 +19,7 @@ namespace YLMAPI.Content {
 
         private static int _DumpedThisFrame = 0;
         private const int _DumpsPerFrame = 16;
-        private const int _MaxDumpsPerFrame = 64;
+        private const int _MaxDumpsPerFrame = 128;
 
         private const string _DumpingUIFormat = "Currently dumping {1} of {2}: {0}";
         private static SGroup _DumpingUI = new SGroup() {
@@ -60,16 +60,22 @@ namespace YLMAPI.Content {
         public static IEnumerator DumpContent(Scene scene) {
             ModLogger.Log("dump", $"Dumping scene: {scene.name}");
             Scene scenePrev = SceneManager.GetActiveScene();
-            if (scenePrev != scene)
+            if (scenePrev != scene) {
                 SceneManager.SetActiveScene(scene);
-            GameObject[] objs = UnityEngine.Object.FindObjectsOfType<GameObject>();
-            if (scenePrev != scene)
+                yield return null;
+            }
+            GameObject[] objs = Resources.FindObjectsOfTypeAll<GameObject>();
+            if (scenePrev != scene) {
                 SceneManager.SetActiveScene(scenePrev);
+                yield return null;
+            }
             _DumpingUILabel.Text = string.Format(_DumpingUIFormat, "", 0, objs.Length);
             _DumpingUIBar.Size.x = 0;
             _DumpingUI.Visible = true;
             for (int i = 0; i < objs.Length; i++)
                 if (objs[i] != null) {
+                    if (objs[i].scene != scene)
+                        continue;
                     if (DumpContent(objs[i].transform))
                         _DumpedThisFrame++;
                     if (_DumpedThisFrame >= _DumpsPerFrame || i % _MaxDumpsPerFrame == 0) {
@@ -79,7 +85,7 @@ namespace YLMAPI.Content {
                         yield return null;
                     }
                 }
-            _DumpingUI.Visible = false;
+            // _DumpingUI.Visible = false;
         }
 
         public static bool DumpContent(Transform t) {
