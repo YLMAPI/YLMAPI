@@ -18,8 +18,8 @@ namespace YLMAPI.Content {
         public static string DumpDirectory = Path.Combine(ModContent.ContentDirectory, "DUMP");
 
         private static int _DumpedThisFrame = 0;
-        private const int _DumpsPerFrame = 16;
-        private const int _MaxDumpsPerFrame = 128;
+        private const int _DumpsPerFrame = 32;
+        private const int _MaxDumpsPerFrame = 512;
 
         private const string _DumpingUIFormat = "Currently dumping {1} of {2}: {0}";
         private static SGroup _DumpingUI = new SGroup() {
@@ -85,7 +85,7 @@ namespace YLMAPI.Content {
                         yield return null;
                     }
                 }
-            // _DumpingUI.Visible = false;
+            _DumpingUI.Visible = false;
         }
 
         public static bool DumpContent(Transform t) {
@@ -137,13 +137,13 @@ namespace YLMAPI.Content {
                     suffix = tex.name.EmptyToNull() ?? ".main";
                 if (suffix.StartsWith(material.name))
                     suffix = suffix.Substring(material.name.Length);
-                dumped |= DumpContent(tex, prefix + suffix);
+                dumped |= DumpContent(c, tex, prefix + suffix);
             }
 
             return dumped;
         }
 
-        public static bool DumpContent(Texture2D tex, string path) {
+        public static bool DumpContent(Component c, Texture2D tex, string path) {
             if (tex == null)
                 return false;
 

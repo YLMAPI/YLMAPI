@@ -16,8 +16,8 @@ namespace YLMAPI.Content {
     public static class ModContentPatcher {
 
         private static int _PatchedThisFrame = 0;
-        private const int _PatchesPerFrame = 16;
-        private const int _MaxPatchesPerFrame = 128;
+        private const int _PatchesPerFrame = 32;
+        private const int _MaxPatchesPerFrame = 512;
 
         public static bool IsInitialized { get; internal set; }
 
@@ -40,6 +40,8 @@ namespace YLMAPI.Content {
                 if (strings == null)
                     continue;
                 string key = tables[i] ?? $"texts_{i}";
+
+                // TODO: Move from files to content mapping.
 
                 string file = Path.Combine(ModContent.TextsDirectory, tm.GetLocale());
                 Directory.CreateDirectory(file);
@@ -84,13 +86,12 @@ namespace YLMAPI.Content {
             => new SceneLoadWrapper(loader, sceneName, ModEvents.ProcessScene);
 
         public static IEnumerator OnProcessScene(IEnumerator loader, Scene scene) {
-            // The loading screen is so finetuned, adding just one yield return null causes the lighting to break!
-            // We need to work around this.
-
             SceneFreezeInfo freeze = scene.Freeze();
 
             Scene scenePrev = SceneManager.GetActiveScene();
             SceneManager.SetActiveScene(scene);
+            // The loading screen is so finetuned, adding just one yield return null causes the lighting to break!
+            // We work around it by giving the scene one freezed frame.
             yield return null;
             SceneManager.SetActiveScene(scenePrev);
 
@@ -102,9 +103,6 @@ namespace YLMAPI.Content {
         }
 
         public static IEnumerator PatchContent(Scene scene) {
-            yield return ModContentDumper.DumpContent(scene);
-            yield break;
-
             ModLogger.Log("content", $"Patching scene content: {scene.name}");
             Scene scenePrev = SceneManager.GetActiveScene();
             if (scenePrev != scene) {
@@ -178,30 +176,43 @@ namespace YLMAPI.Content {
                     suffix = tex.name.EmptyToNull() ?? ".main";
                 if (suffix.StartsWith(material.name))
                     suffix = suffix.Substring(material.name.Length);
-                patched |= PatchContent(ref tex, prefix + suffix);
+                patched |= PatchContent(c, ref tex, prefix + suffix);
                 material.mainTexture = tex;
             }
 
             return patched;
         }
 
-        public static bool PatchContent(ref Texture2D tex, string path) {
+        public static bool PatchContent(Component c, ref Texture2D tex, string path) {
             if (tex == null)
                 return false;
             if (!string.IsNullOrEmpty(tex.name))
-                path = Path.Combine("Textures", tex.name);
-            path = Path.Combine(ModContent.PatchesDirectory, path.NormalizePath() + ".png");
-            if (!File.Exists(path))
-                return false;
+                path = "Textures/" + tex.name;
 
-            bool copied = !tex.IsReadable();
-            if (copied)
-                tex = tex.GetRW();
+            path = ModContent.PatchesPrefix + path;
+            bool patched = false;
+            AssetMetadata meta;
 
-            Directory.CreateDirectory(Path.GetDirectoryName(path));
-            File.WriteAllBytes(path, tex.EncodeToPNG());
+            if (ModContent.TryGetMapped("Textures/_uv_all", out meta)) {
+                tex = ModContent.Load<Texture2D>(path);
+                patched = true;
+            }
 
-            return true;
+            if (ModContent.TryGetMapped(path, out meta)) {
+                if (meta.AssetType == ModContent.Types.Texture2D) {
+                    tex = ModContent.Load<Texture2D>(path);
+                } else {
+                    // TODO: Animation metadata type
+                }
+                patched = true;
+            }
+
+            if (ModContent.TryGetMapped(path + ".patch", out meta)) {
+                tex = tex.Copy().Patch(ModContent.Load<Texture2D>(path + ".patch"));
+                patched = true;
+            }
+
+            return patched;
         }
 
     }

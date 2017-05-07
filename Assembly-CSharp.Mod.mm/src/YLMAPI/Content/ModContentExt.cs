@@ -50,6 +50,38 @@ namespace YLMAPI.Content {
             return copy;
         }
 
+        public static Texture2D Patch(this Texture2D texture, Texture2D patch) {
+            if (texture == null)
+                return null;
+            if (patch == null)
+                return texture;
+
+            RenderTexture patchRT = RenderTexture.GetTemporary(
+                texture.width, texture.height, 0,
+                RenderTextureFormat.Default, RenderTextureReadWrite.Default
+            );
+
+            Graphics.Blit(texture, patchRT);
+
+            RenderTexture previousRT = RenderTexture.active;
+            RenderTexture.active = patchRT;
+
+            GL.PushMatrix();
+            GL.LoadPixelMatrix(0f, 1f, 1f, 0f);
+
+            Graphics.DrawTexture(new Rect(0, 0, 1f, 1f), patch);
+
+            GL.PopMatrix();
+
+            texture.ReadPixels(new Rect(0, 0, patchRT.width, patchRT.height), 0, 0);
+            texture.Apply(true, false);
+
+            RenderTexture.active = previousRT;
+            RenderTexture.ReleaseTemporary(patchRT);
+
+            return texture;
+        }
+
         public static Texture2D GetRW(this Texture2D texture) {
             if (texture == null)
                 return null;

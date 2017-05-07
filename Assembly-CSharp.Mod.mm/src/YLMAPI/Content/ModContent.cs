@@ -15,16 +15,36 @@ using MonoMod.Detour;
 namespace YLMAPI.Content {
     public static class ModContent {
 
+        /// <summary>
+        /// Cached type references. Microoptimization to replace ldtoken and token to ref conversion call with ldfld.
+        /// </summary>
+        public static class Types {
+            public readonly static Type Object = typeof(object);
+            public readonly static Type UnityObject = typeof(UnityEngine.Object);
+
+            public readonly static Type ModContent = typeof(ModContent);
+            public readonly static Type Resources = typeof(Resources);
+
+            public readonly static Type AssetTypeDirectory = typeof(AssetTypeDirectory);
+            public readonly static Type AssetTypeAssembly = typeof(AssetTypeAssembly);
+
+            public readonly static Type Texture = typeof(Texture);
+            public readonly static Type Texture2D = typeof(Texture2D);
+        }
+
         public static string ContentDirectory;
         public static string PatchesDirectory;
+        public static string PatchesPrefix;
         public static string TextsDirectory;
+        public static string TextsPrefix;
 
         public readonly static Dictionary<string, AssetMetadata> Map = new Dictionary<string, AssetMetadata>();
         public readonly static Dictionary<string, AssetMetadata> MapDirs = new Dictionary<string, AssetMetadata>();
 
         public readonly static Dictionary<string, object> Cache = new Dictionary<string, object>();
         public readonly static HashSet<Type> CacheableTypes = new HashSet<Type>() {
-            typeof(Texture2D)
+            Types.Texture,
+            Types.Texture2D
         };
 
         public static bool IsInitialized { get; internal set; }
@@ -38,15 +58,19 @@ namespace YLMAPI.Content {
             IsInitialized = true;
 
             Directory.CreateDirectory(ContentDirectory = Path.Combine(ModAPI.GameDirectory, "Content"));
-            Directory.CreateDirectory(PatchesDirectory = Path.Combine(ContentDirectory, "Patches"));
-            Directory.CreateDirectory(TextsDirectory = Path.Combine(ContentDirectory, "Texts"));
+
+            Directory.CreateDirectory(PatchesDirectory = Path.Combine(ContentDirectory, PatchesPrefix = "Patches"));
+            PatchesPrefix += "/";
+
+            Directory.CreateDirectory(TextsDirectory = Path.Combine(ContentDirectory, TextsPrefix = "Texts"));
+            TextsPrefix += "/";
 
             Crawl(Assembly.GetExecutingAssembly());
             Crawl(ContentDirectory);
 
-            MethodInfo m_Resources_Load = typeof(Resources).GetMethod("Load", new Type[] { typeof(string), typeof(Type) });
-            m_Resources_Load.Detour(typeof(ModContent).GetMethod("LoadHook"));
-            typeof(ModContent).GetMethod("trampoline_LoadHook").Detour(m_Resources_Load.CreateOrigTrampoline());
+            MethodInfo m_Resources_Load = Types.Resources.GetMethod("Load", new Type[] { typeof(string), typeof(Type) });
+            m_Resources_Load.Detour(Types.ModContent.GetMethod("LoadHook"));
+            Types.ModContent.GetMethod("trampoline_LoadHook").Detour(m_Resources_Load.CreateOrigTrampoline());
 
             ModContentPatcher.Init();
         }
@@ -71,20 +95,20 @@ namespace YLMAPI.Content {
             path = path.Replace('\\', '/');
             if (metadata.AssetType == null)
                 path = RemoveExtension(path, out metadata.AssetType);
-            if (metadata.AssetType == typeof(AssetTypeDirectory))
+            if (metadata.AssetType == Types.AssetTypeDirectory)
                 return MapDirs[path] = metadata;
 
             return Map[path] = metadata;
         }
 
         public static string RemoveExtension(string file, out Type type) {
-            type = typeof(object);
+            type = Types.Object;
 
             if (file.EndsWith(".dll")) {
-                type = typeof(AssetTypeAssembly);
+                type = Types.AssetTypeAssembly;
 
             } else if (file.EndsWith(".png")) {
-                type = typeof(Texture2D);
+                type = Types.Texture2D;
                 file = file.Substring(0, file.Length - 4);
             }
 
@@ -92,7 +116,7 @@ namespace YLMAPI.Content {
         }
 
         public static void Crawl(string dir, string root = null) {
-            if (Path.GetDirectoryName(dir).StartsWith("DUMP"))
+            if (Path.GetFileName(dir).StartsWith("DUMP"))
                 return;
             if (root == null)
                 root = dir;
@@ -105,7 +129,7 @@ namespace YLMAPI.Content {
             for (int i = 0; i < files.Length; i++) {
                 string file = files[i];
                 AddMapping(file.Substring((root?.Length ?? 0) + 1), new AssetMetadata(file) {
-                    AssetType = typeof(AssetTypeDirectory),
+                    AssetType = Types.AssetTypeDirectory,
                     HasData = false
                 });
                 Crawl(file, root);
@@ -169,7 +193,8 @@ namespace YLMAPI.Content {
             if (metadata == null)
                 goto NoMetadata;
 
-            if (metadata.AssetType == typeof(Texture2D)) {
+            if ((type == Types.Texture || type == Types.Texture2D) &&
+                metadata.AssetType == Types.Texture2D) {
                 Texture2D tex = new Texture2D(2, 2);
                 tex.name = Path.GetFileName(path);
                 tex.LoadImage(metadata.Data);

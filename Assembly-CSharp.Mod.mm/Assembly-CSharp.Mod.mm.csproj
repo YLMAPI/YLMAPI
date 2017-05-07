@@ -82,6 +82,7 @@
     <Compile Include="src\Third-Party\BoundBoxes_drawLines.cs" />
     <Compile Include="src\Common\LimitedStream.cs" />
     <Compile Include="src\MonoMod\MonoModRules.cs" />
+    <Compile Include="src\YLMAPI\Content\AnimatedTexture.cs" />
     <Compile Include="src\YLMAPI\Content\AssetTypes.cs" />
     <Compile Include="src\YLMAPI\Content\ModContentPatcher.cs" />
     <Compile Include="src\YLMAPI\GameMod.cs" />
