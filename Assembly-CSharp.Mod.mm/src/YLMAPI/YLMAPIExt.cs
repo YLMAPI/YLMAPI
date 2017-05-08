@@ -61,6 +61,8 @@ public static class YLMAPIExt {
 
     public static string EmptyToNull(this string s)
         => string.IsNullOrEmpty(s) ? null : s;
+    public static string NullToEmpty(this string s)
+        => s == null ? "" : s;
 
     public static Dictionary<string, Text> GetTexts(this GameObject go) {
         return GetTexts(go.transform);

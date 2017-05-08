@@ -85,6 +85,7 @@
     <Compile Include="src\YLMAPI\Content\AnimatedTexture.cs" />
     <Compile Include="src\YLMAPI\Content\AssetTypes.cs" />
     <Compile Include="src\YLMAPI\Content\ModContentPatcher.cs" />
+    <Compile Include="src\YLMAPI\Content\OBJLoader.cs" />
     <Compile Include="src\YLMAPI\GameMod.cs" />
     <Compile Include="src\YLMAPI\Content\ModContentExt.cs" />
     <Compile Include="src\YLMAPI\Content\ModContentDumper.cs" />

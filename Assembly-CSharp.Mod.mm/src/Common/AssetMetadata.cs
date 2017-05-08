@@ -10,6 +10,7 @@ public class AssetMetadata {
 
     public ContainerType Container;
     public System.Type AssetType = null;
+    public string AssetFormat = null;
 
     public bool HasData = true;
 

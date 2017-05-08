@@ -149,10 +149,29 @@ namespace YLMAPI.Content {
         public static bool PatchContent(Component c, string prefix = "") {
             prefix = $"{prefix}{c.GetType().Name}";
 
+            if (c is SkinnedMeshRenderer) {
+                SkinnedMeshRenderer mf = ((SkinnedMeshRenderer) c);
+                Mesh m = mf.sharedMesh;
+                bool patched = PatchContent(c, ref m, prefix);
+                mf.sharedMesh = m;
+                goto Renderer;
+            }
+
             if (c is Renderer)
-                return PatchContent(c, ((Renderer) c).sharedMaterials, prefix);
+                goto Renderer;
+
+            if (c is MeshFilter) {
+                MeshFilter mf = ((MeshFilter) c);
+                Mesh m = mf.sharedMesh;
+                bool patched = PatchContent(c, ref m, prefix);
+                mf.sharedMesh = m;
+                return patched;
+            }
 
             return false;
+
+            Renderer:
+            return PatchContent(c, ((Renderer) c).sharedMaterials, prefix);
         }
 
         public static bool PatchContent(Component c, Material[] materials, string prefix = "") {
@@ -209,6 +228,26 @@ namespace YLMAPI.Content {
 
             if (ModContent.TryGetMapped(path + ".patch", out meta)) {
                 tex = tex.Copy().Patch(ModContent.Load<Texture2D>(path + ".patch"));
+                patched = true;
+            }
+
+            return patched;
+        }
+
+        public static bool PatchContent(Component c, ref Mesh mesh, string path) {
+            if (mesh == null)
+                return false;
+            if (!string.IsNullOrEmpty(mesh.name) && !mesh.name.StartsWith("Combined Mesh"))
+                path = "Models/" + mesh.name;
+
+            path = ModContent.PatchesPrefix + path;
+            bool patched = false;
+            AssetMetadata meta;
+
+            if (ModContent.TryGetMapped(path, out meta)) {
+                Mesh repl = ModContent.Load<Mesh>(path);
+                repl.name = mesh.name;
+                mesh = repl;
                 patched = true;
             }
 

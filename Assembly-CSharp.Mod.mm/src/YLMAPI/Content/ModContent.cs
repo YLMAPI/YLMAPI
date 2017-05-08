@@ -11,6 +11,7 @@ using UEInput = UnityEngine.Input;
 using System.IO;
 using System.Reflection;
 using MonoMod.Detour;
+using YLMAPI.Content.OBJ;
 
 namespace YLMAPI.Content {
     public static class ModContent {
@@ -30,6 +31,12 @@ namespace YLMAPI.Content {
 
             public readonly static Type Texture = typeof(Texture);
             public readonly static Type Texture2D = typeof(Texture2D);
+
+            public readonly static Type Meshes = typeof(List<Mesh>);
+            public readonly static Type Mesh = typeof(Mesh);
+
+            public readonly static Type OBJData = typeof(OBJData);
+            public readonly static Type OBJObject = typeof(OBJObject);
         }
 
         public static string ContentDirectory;
@@ -94,15 +101,16 @@ namespace YLMAPI.Content {
         public static AssetMetadata AddMapping(string path, AssetMetadata metadata) {
             path = path.Replace('\\', '/');
             if (metadata.AssetType == null)
-                path = RemoveExtension(path, out metadata.AssetType);
+                path = ParseType(path, out metadata.AssetType, out metadata.AssetFormat);
             if (metadata.AssetType == Types.AssetTypeDirectory)
                 return MapDirs[path] = metadata;
 
             return Map[path] = metadata;
         }
 
-        public static string RemoveExtension(string file, out Type type) {
+        public static string ParseType(string file, out Type type, out string format) {
             type = Types.Object;
+            format = file.Length < 4 ? null : file.Substring(file.Length - 3);
 
             if (file.EndsWith(".dll")) {
                 type = Types.AssetTypeAssembly;
@@ -110,7 +118,12 @@ namespace YLMAPI.Content {
             } else if (file.EndsWith(".png")) {
                 type = Types.Texture2D;
                 file = file.Substring(0, file.Length - 4);
+            } else if (file.EndsWith(".obj")) {
+                type = Types.Meshes;
+                file = file.Substring(0, file.Length - 4);
             }
+
+            // TODO: Check for .patch.*, handle patches separately.
 
             return file;
         }
@@ -199,6 +212,21 @@ namespace YLMAPI.Content {
                 tex.name = Path.GetFileName(path);
                 tex.LoadImage(metadata.Data);
                 return tex;
+            }
+
+            if (metadata.AssetType == Types.Meshes &&
+                metadata.AssetFormat == "obj") {
+                OBJData data = OBJParser.ParseOBJ(metadata.Stream);
+
+                if (type == Types.OBJData)
+                    return data;
+                else if (type == Types.OBJObject)
+                    return data.Objects.Count == 0 ? null : data.Objects[0];
+
+                else if (type == Types.Meshes)
+                    return data.ToMeshes();
+                else
+                    return data.Objects.Count == 0 ? null : data.Objects[0].ToMesh();
             }
 
             NoMetadata:
