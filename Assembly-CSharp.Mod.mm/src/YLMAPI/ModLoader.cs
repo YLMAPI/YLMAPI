@@ -159,11 +159,11 @@ namespace YLMAPI {
                                 asm = meta.GetRelinkedAssembly(ms);
                             }
                         }
-                    } else {
-                        ModContent.AddMapping(entryName, new AssetMetadata(archive, entryName) {
-                            AssetType = entry.IsDirectory ? typeof(AssetTypeDirectory) : null
-                        });
                     }
+
+                    ModContent.AddMapping(entryName, new AssetMetadata(archive, entryName) {
+                        AssetType = entry.IsDirectory ? typeof(AssetTypeDirectory) : null
+                    });
                 }
             }
 
@@ -211,7 +211,7 @@ namespace YLMAPI {
             }
 
             // ... then everything else
-            ModContent.Crawl(dir);
+            ModContent.Crawl(null, dir);
             if (meta == null || !File.Exists(meta.DLL))
                 return;
             if (!string.IsNullOrEmpty(meta.PatchDLL) && File.Exists(meta.PatchDLL))
@@ -228,7 +228,7 @@ namespace YLMAPI {
         }
 
         public static void LoadMod(GameModMetadata meta, Assembly asm) {
-            ModContent.Crawl(asm);
+            ModContent.Crawl(null, asm);
 
             Type[] types;
             try {

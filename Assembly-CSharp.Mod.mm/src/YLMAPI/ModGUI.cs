@@ -34,8 +34,6 @@ namespace YLMAPI {
         public static SGroup SettingsGroup;
 
         public static SGroup ScenesGroup;
-        public static SGroup HierarchyGroup;
-        public static SGroup InspectorGroup;
 
         private readonly static HashSet<Canvas> _HiddenCanvases = new HashSet<Canvas>();
 
@@ -43,15 +41,13 @@ namespace YLMAPI {
             if (Root != null)
                 return;
 
+            Root = SGUIRoot.Setup();
+            GameObject.Find("SGUI Root").tag = "DoNotPause";
+
             ModEvents.OnUpdate += Update;
             SceneManager.activeSceneChanged += (sceneA, sceneB) => {
                 ShowGameGUI();
-                RefreshHierarchy();
             };
-
-
-            Root = SGUIRoot.Setup();
-            GameObject.Find("SGUI Root").tag = "DoNotPause";
 
             Root.Background = new Color(
                 0.17f,
@@ -152,6 +148,48 @@ namespace YLMAPI {
                             AutoLayout = elem => elem.AutoLayoutVertical,
                             OnUpdateStyle = SegmentGroupUpdateStyle,
                             Children = {
+                                new SLabel("YLMAPI-DEV TOOLS:") {
+                                    Background = HeaderBackground,
+                                    Foreground = HeaderForeground
+                                },
+
+                                new SButton("Clear loaded content mod cache") {
+                                    Alignment = TextAnchor.MiddleLeft,
+                                    OnClick = b => {
+                                        ModContent.Cache.Clear();
+                                    }
+                                },
+
+                                new SButton("Recreate content mod tree") {
+                                    Alignment = TextAnchor.MiddleLeft,
+                                    OnClick = b => {
+                                        ModContent.Recrawl();
+                                    }
+                                },
+
+                                /*
+                                new SButton("Recrawl content mods") {
+                                    Alignment = TextAnchor.MiddleLeft,
+                                    OnClick = b => {
+                                        // ModContent.Recrawl();
+                                    }
+                                },
+                                */
+
+                                new SButton("Patch content in scene") {
+                                    Alignment = TextAnchor.MiddleLeft,
+                                    OnClick = b => {
+                                        ModContentPatcher.PatchContent(SceneManager.GetActiveScene()).StartGlobal();
+                                    }
+                                }
+                            }
+                        },
+
+                        new SGroup() {
+                            Background = new Color(0f, 0f, 0f, 0f),
+                            AutoLayout = elem => elem.AutoLayoutVertical,
+                            OnUpdateStyle = SegmentGroupUpdateStyle,
+                            Children = {
                                 new SLabel("General:") {
                                     Background = HeaderBackground,
                                     Foreground = HeaderForeground
@@ -206,40 +244,6 @@ namespace YLMAPI {
                         elem.Size = new Vector2(256, elem.Parent.Size.y - elem.Position.y - Padding);
                     },
                     With = { new SGroupForceScrollModifier() }
-                }),
-
-                new SLabel("Hierarchy:") {
-                    OnUpdateStyle = elem => {
-                        elem.Position = new Vector2(elem.Previous.Previous.Position.x + elem.Previous.Size.x + Padding, elem.Previous.Previous.Position.y);
-                    }
-                },
-
-                (HierarchyGroup = new SGroup {
-                    ScrollDirection = SGroup.EDirection.Vertical,
-                    AutoLayout = elem => elem.AutoLayoutVertical,
-                    AutoLayoutPadding = Padding,
-                    OnUpdateStyle = elem => {
-                        elem.Position = new Vector2(elem.Previous.Position.x, elem.Previous.Position.y + elem.Previous.Size.y + Padding);
-                        elem.Size = new Vector2(256, elem.Parent.Size.y - elem.Position.y - Padding);
-                    },
-                    With = { new SGroupMinimumContentSizeModifier(), new SGroupForceScrollModifier() }
-                }),
-
-                new SLabel("Inspector:") {
-                    OnUpdateStyle = elem => {
-                        elem.Position = new Vector2(elem.Previous.Previous.Position.x + elem.Previous.Size.x + Padding, elem.Previous.Previous.Position.y);
-                    }
-                },
-
-                (InspectorGroup = new SGroup {
-                    ScrollDirection = SGroup.EDirection.Vertical,
-                    AutoLayout = elem => elem.AutoLayoutVertical,
-                    AutoLayoutPadding = Padding,
-                    OnUpdateStyle = elem => {
-                        elem.Position = new Vector2(elem.Previous.Position.x, elem.Previous.Position.y + elem.Previous.Size.y + Padding);
-                        elem.Size = new Vector2(256, elem.Parent.Size.y - elem.Position.y - Padding);
-                    },
-                    With = { new SGroupMinimumContentSizeModifier(), new SGroupForceScrollModifier() }
                 }),
 
             }
@@ -311,7 +315,6 @@ namespace YLMAPI {
                 MainGroup.Visible = !MainGroup.Visible;
                 Cursor.visible = MainGroup.Visible;
                 Cursor.lockState = CursorLockMode.None;
-                // UnityEngine.Object.FindObjectsOfType<SimpleSmoothMouseLook>().ForEach((ssml, i) => ssml.enabled = !MainGroup.Visible);
             }
 
             if (Input.GetKeyDown(KeyCode.F11)) {
@@ -401,197 +404,6 @@ namespace YLMAPI {
                 AddScene(arcadeGames[i].sceneName);
                 AddScene(arcadeGames[i].sceneName + "_Standalone");
                 yield return null;
-            }
-        }
-
-        private static Coroutine _C_RefreshHierarchy;
-        public static void RefreshHierarchy() {
-            _C_RefreshHierarchy = _RefreshHierarchy(_C_RefreshHierarchy).StartGlobal();
-            Inspect(null);
-        }
-        private static IEnumerator _RefreshHierarchy(Coroutine prev) {
-            if (prev != null) {
-                prev.StopGlobal();
-                yield return null;
-            }
-
-            Scene scene = SceneManager.GetActiveScene();
-            while (!scene.isLoaded)
-                yield return null;
-
-            HierarchyGroup.Children.Clear();
-            SPreloader preloader = new SPreloader() {
-                Parent = HierarchyGroup
-            };
-            yield return null;
-
-            new SButton("Refresh") {
-                Parent = HierarchyGroup,
-                Icon = ModContent.Load<Texture2D>("ylmapi/gui/refresh"),
-                IconScale = new Vector2(0.25f, 0.25f),
-                Alignment = TextAnchor.MiddleLeft,
-                OnClick = elem => {
-                    RefreshHierarchy();
-                }
-            };
-
-            GameObject[] gos = UnityEngine.Object.FindObjectsOfType<GameObject>();
-            ModLogger.Log("main", $"{gos.Length} game objects.");
-            /*
-            int perBatch = gos.Length / 30;
-            for (int i = 0; i < gos.Length; i++) {
-                try {
-                    gos[i].GetOrAddComponent<BoundBoxes_BoundBox>();
-                } catch {
-                }
-                if (i % perBatch == 0)
-                    yield return null;
-            }
-            */
-
-            /*
-            IEnumerator e = _AddTransformChildrenGroups(null, null);
-            while (e.MoveNext())
-                yield return e.Current;
-            */
-
-            preloader.Modifiers.Add(new SFadeOutShrinkSequence());
-        }
-        private static IEnumerator _AddTransformChildrenGroups(SGroup parent, Transform t) {
-            if (ReferenceEquals(t, null)) {
-                Scene scene = SceneManager.GetActiveScene();
-                GameObject[] roots = scene.GetRootGameObjects();
-
-                foreach (GameObject root in roots) {
-                    yield return null;
-                    if (root == null)
-                        continue;
-                    AddTransformGroup(parent, root.transform);
-                }
-                yield break;
-            }
-
-            if (t == null)
-                yield break;
-
-            for (int i = 0; i < t.childCount; i++) {
-                yield return null;
-                AddTransformGroup(parent, t.GetChild(i));
-            }
-
-            yield return null;
-            HierarchyGroup.UpdateStyle();
-        }
-        public static SGroup AddTransformGroup(SGroup parent, Transform t) {
-            if (t == null)
-                return null;
-
-            bool childrenAdded = false;
-            SGroup group = new SGroup() {
-                Parent = parent ?? HierarchyGroup,
-                Border = 0,
-                OnUpdateStyle = elem => {
-                    SGroup g = (SGroup) elem;
-                    SegmentGroupUpdateStyle(elem);
-                    g.ContentSize.y = g.Size.y;
-                    if (elem[1].Visible)
-                        return;
-                    g.Size.y = g[0].Size.y;
-                },
-                Children = {
-                new SButton(t.name) {
-                    Alignment = TextAnchor.MiddleLeft,
-                    OnClick = elem => {
-                        Inspect(t);
-                        elem.Next.Visible = !elem.Next.Visible;
-                        HierarchyGroup.UpdateStyle();
-                    }
-                },
-                new SGroup() {
-                    Visible = false,
-                    AutoLayout = elem => elem.AutoLayoutVertical,
-                    AutoLayoutPadding = Padding,
-                    OnUpdateStyle = elem => {
-                        if (elem.Visible && !childrenAdded) {
-                            childrenAdded = true;
-                            _AddTransformChildrenGroups((SGroup) elem, t).StartGlobal();
-                        }
-                        SegmentGroupUpdateStyle(elem);
-                        elem.Position = new Vector2(
-                            PaddingHierarchyDepth,
-                            elem.Previous.Position.y + elem.Previous.Size.y
-                        );
-                        elem.Size.x = elem.Parent.InnerSize.x - PaddingHierarchyDepth;
-                    },
-                }
-            }
-            };
-
-            return group;
-        }
-        public static void Inspect(Transform t) {
-            InspectorGroup.Children.Clear();
-            if (t == null)
-                return;
-
-            new SButton("Refresh") {
-                Parent = InspectorGroup,
-                Icon = ModContent.Load<Texture2D>("ylmapi/gui/refresh"),
-                IconScale = new Vector2(0.25f, 0.25f),
-                Alignment = TextAnchor.MiddleLeft,
-                OnClick = elem => {
-                    Inspect(t);
-                }
-            };
-
-            new SLabel(t.name) {
-                Parent = InspectorGroup,
-                Alignment = TextAnchor.MiddleCenter
-            };
-            Vector3 pos = t.position;
-            Vector3 rot = t.eulerAngles;
-            new SLabel($"Position: {pos.x.ToString("0000.00")}, {pos.y.ToString("0000.00")}, {pos.z.ToString("0000.00")}") {
-                Parent = InspectorGroup,
-                Alignment = TextAnchor.MiddleLeft
-            };
-            new SLabel($"Rotation: {rot.x.ToString("0000.00")}, {rot.y.ToString("0000.00")}, {rot.z.ToString("0000.00")}") {
-                Parent = InspectorGroup,
-                Alignment = TextAnchor.MiddleLeft
-            };
-            new SButton("Is Object Active") {
-                Parent = InspectorGroup,
-                Alignment = TextAnchor.MiddleLeft,
-                With = { new SCheckboxModifier() {
-                    GetValue = b => t.gameObject.activeSelf,
-                    SetValue = (b, v) => t.gameObject.SetActive(v)
-                }}
-            };
-
-            ModEvents.Inspect(t);
-
-            new SButton("Move Camera To Object") {
-                Parent = InspectorGroup,
-                Icon = ModContent.Load<Texture2D>("ylmapi/gui/camera"),
-                IconScale = new Vector2(0.25f, 0.25f),
-                Alignment = TextAnchor.MiddleLeft,
-                OnClick = elem => {
-                    if (t == null || Camera.main == null)
-                        return;
-                    Camera.main.transform.position = t.position;
-                }
-            };
-
-            Behaviour[] components = t.GetComponents<Behaviour>();
-            for (int i = 0; i < components.Length; i++) {
-                Behaviour c = components[i];
-                new SButton(c.GetType().Name) {
-                    Parent = InspectorGroup,
-                    Alignment = TextAnchor.MiddleLeft,
-                    With = { new SCheckboxModifier() {
-                    GetValue = b => c.enabled,
-                    SetValue = (b, v) => c.enabled = v
-                }}
-                };
             }
         }
 

@@ -12,6 +12,7 @@ using System.IO;
 using System.Reflection;
 using MonoMod.Detour;
 using YLMAPI.Content.OBJ;
+using Ionic.Zip;
 
 namespace YLMAPI.Content {
     public static class ModContent {
@@ -24,6 +25,7 @@ namespace YLMAPI.Content {
             public readonly static Type UnityObject = typeof(UnityEngine.Object);
 
             public readonly static Type ModContent = typeof(ModContent);
+            public readonly static Type ModContentHooks = typeof(ModContentHooks);
             public readonly static Type Resources = typeof(Resources);
 
             public readonly static Type AssetTypeDirectory = typeof(AssetTypeDirectory);
@@ -51,8 +53,14 @@ namespace YLMAPI.Content {
         public readonly static Dictionary<string, object> Cache = new Dictionary<string, object>();
         public readonly static HashSet<Type> CacheableTypes = new HashSet<Type>() {
             Types.Texture,
-            Types.Texture2D
+            Types.Texture2D,
+            Types.Meshes,
+            Types.Mesh,
+            Types.OBJData,
+            Types.OBJObject
         };
+
+        public readonly static List<ContentModMetadata> Mods = new List<ContentModMetadata>();
 
         public static bool IsInitialized { get; internal set; }
 
@@ -72,15 +80,15 @@ namespace YLMAPI.Content {
             Directory.CreateDirectory(TextsDirectory = Path.Combine(ContentDirectory, TextsPrefix = "Texts"));
             TextsPrefix += "/";
 
-            Crawl(Assembly.GetExecutingAssembly());
-            Crawl(ContentDirectory);
+            Crawl(null, Assembly.GetExecutingAssembly());
+            Crawl(null, ContentDirectory);
 
-            MethodInfo m_Resources_Load = Types.Resources.GetMethod("Load", new Type[] { typeof(string), typeof(Type) });
-            m_Resources_Load.Detour(Types.ModContent.GetMethod("LoadHook"));
-            Types.ModContent.GetMethod("trampoline_LoadHook").Detour(m_Resources_Load.CreateOrigTrampoline());
+            OBJParser.StreamProvider = (s, type, path) => new StreamReader(GetMapped(path)?.Stream);
 
+            ModContentHooks.Init();
             ModContentPatcher.Init();
         }
+
 
         public static bool TryGetMapped(string path, out AssetMetadata metadata, bool includeDirs = false) {
             if (includeDirs) {
@@ -128,7 +136,32 @@ namespace YLMAPI.Content {
             return file;
         }
 
-        public static void Crawl(string dir, string root = null) {
+        public static void Recrawl() {
+            Cache.Clear();
+
+            Map.Clear();
+            MapDirs.Clear();
+
+            for (int i = 0; i < Mods.Count; i++)
+                Crawl(Mods[i]);
+        }
+
+        public static void Crawl(ContentModMetadata meta) {
+            if (meta.Directory != null)
+                Crawl(meta, meta.Directory);
+            else if (meta.Archive != null)
+                using (ZipFile zip = ZipFile.Read(meta.Archive))
+                    Crawl(meta, meta.Archive, zip);
+            else if (meta.Assembly != null)
+                Crawl(meta, meta.Assembly);
+        }
+
+        public static void Crawl(ContentModMetadata meta, string dir, string root = null) {
+            if (meta == null)
+                Mods.Add(meta = new ContentModMetadata() {
+                    Directory = dir
+                });
+
             if (Path.GetFileName(dir).StartsWith("DUMP"))
                 return;
             if (root == null)
@@ -145,11 +178,16 @@ namespace YLMAPI.Content {
                     AssetType = Types.AssetTypeDirectory,
                     HasData = false
                 });
-                Crawl(file, root);
+                Crawl(meta, file, root);
             }
         }
 
-        public static void Crawl(Assembly asm) {
+        public static void Crawl(ContentModMetadata meta, Assembly asm) {
+            if (meta == null)
+                Mods.Add(meta = new ContentModMetadata() {
+                    Assembly = asm
+                });
+
             string[] resourceNames = asm.GetManifestResourceNames();
             for (int i = 0; i < resourceNames.Length; i++) {
                 string name = resourceNames[i];
@@ -161,15 +199,18 @@ namespace YLMAPI.Content {
             }
         }
 
-        internal delegate UnityEngine.Object d_LoadHook(string path, Type type);
-        public static UnityEngine.Object trampoline_LoadHook(string path, Type type) { return null; }
-        public static UnityEngine.Object LoadHook(string path, Type type) {
-            object value = Load(path, type);
-            if (value == null)
-                return trampoline_LoadHook(path, type);
-            if (value is UnityEngine.Object)
-                return (UnityEngine.Object) value;
-            return new ModContentWrapper(value, type);
+        public static void Crawl(ContentModMetadata meta, string archive, ZipFile zip) {
+            if (meta == null)
+                Mods.Add(meta = new ContentModMetadata() {
+                    Archive = archive
+                });
+
+            foreach (ZipEntry entry in zip.Entries) {
+                string entryName = entry.FileName.Replace("\\", "/");
+                AddMapping(entryName, new AssetMetadata(archive, entryName) {
+                    AssetType = entry.IsDirectory ? typeof(AssetTypeDirectory) : null
+                });
+            }
         }
 
 
@@ -216,7 +257,7 @@ namespace YLMAPI.Content {
 
             if (metadata.AssetType == Types.Meshes &&
                 metadata.AssetFormat == "obj") {
-                OBJData data = OBJParser.ParseOBJ(metadata.Stream);
+                OBJData data = OBJParser.ParseOBJ(path);
 
                 if (type == Types.OBJData)
                     return data;
@@ -232,6 +273,25 @@ namespace YLMAPI.Content {
             NoMetadata:
             return null;
         }
+
+    }
+
+    public class ContentModMetadata {
+
+        /// <summary>
+        /// The path to the ZIP of the mod, if this is a .zip mod.
+        /// </summary>
+        public virtual string Archive { get; set; }
+
+        /// <summary>
+        /// The path to the directory of the mod, if this is a directory mod.
+        /// </summary>
+        public virtual string Directory { get; set; }
+
+        /// <summary>
+        /// The assembly containing the resources, if the source is an assembly.
+        /// </summary>
+        public virtual Assembly Assembly { get; set; }
 
     }
 }
