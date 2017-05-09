@@ -11,6 +11,7 @@ using UEInput = UnityEngine.Input;
 using System.IO;
 using System.Reflection;
 using MonoMod.Detour;
+using MonoMod.Helpers;
 
 namespace YLMAPI.Content.OBJ {
     public delegate StreamReader StreamProvider(OBJParserStatus s, string type, string path);
@@ -285,7 +286,7 @@ namespace YLMAPI.Content.OBJ {
         public List<Vector2> UVs = new List<Vector2>();
         public List<Vector3> Normals = new List<Vector3>();
 
-        public Dictionary<string, int> IndexCache = new Dictionary<string, int>();
+        public IDictionary<string, int> IndexCache = new FastDictionary<string, int>();
 
         public bool ContainsNormals = false;
 
@@ -294,7 +295,7 @@ namespace YLMAPI.Content.OBJ {
         public List<Vector2> UUVs = new List<Vector2>();
 
         public List<string> Materials = new List<string>();
-        public Dictionary<string, List<OBJFace>> Faces = new Dictionary<string, List<OBJFace>>();
+        public IDictionary<string, List<OBJFace>> Faces = new FastDictionary<string, List<OBJFace>>();
 
         public OBJGroup() {
         }
@@ -323,7 +324,7 @@ namespace YLMAPI.Content.OBJ {
             List<Vector3> pNormals = new List<Vector3>();
             List<Vector2> pUVs = new List<Vector2>();
             List<List<int>> pIndices = new List<List<int>>();
-            Dictionary<int, int> map = new Dictionary<int, int>();
+            IDictionary<int, int> map = new IntDictionary<int>();
 
             HashSet<string> materials = new HashSet<string>();
 

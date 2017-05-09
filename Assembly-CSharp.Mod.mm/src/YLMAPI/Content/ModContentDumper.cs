@@ -19,7 +19,7 @@ namespace YLMAPI.Content {
 
         private static int _DumpedThisFrame = 0;
         private const int _DumpsPerFrame = 32;
-        private const int _MaxDumpsPerFrame = 512;
+        private const int _MaxObjectsPerFrame = 512;
 
         private const string _DumpingUIFormat = "Currently dumping {1} of {2}: {0}";
         private static SGroup _DumpingUI = new SGroup() {
@@ -57,35 +57,38 @@ namespace YLMAPI.Content {
         private static SLabel _DumpingUILabel = (SLabel) _DumpingUI[1];
         private static SImage _DumpingUIBar = (SImage) _DumpingUI[2];
 
+        private readonly static object _DumpLock = new object();
         public static IEnumerator DumpContent(Scene scene) {
-            ModLogger.Log("dump", $"Dumping scene: {scene.name}");
-            Scene scenePrev = SceneManager.GetActiveScene();
-            if (scenePrev != scene) {
-                SceneManager.SetActiveScene(scene);
-                yield return null;
-            }
-            GameObject[] objs = Resources.FindObjectsOfTypeAll<GameObject>();
-            if (scenePrev != scene) {
-                SceneManager.SetActiveScene(scenePrev);
-                yield return null;
-            }
-            _DumpingUILabel.Text = string.Format(_DumpingUIFormat, "", 0, objs.Length);
-            _DumpingUIBar.Size.x = 0;
-            _DumpingUI.Visible = true;
-            for (int i = 0; i < objs.Length; i++)
-                if (objs[i] != null) {
-                    if (objs[i].scene != scene)
-                        continue;
-                    if (DumpContent(objs[i].transform))
-                        _DumpedThisFrame++;
-                    if (_DumpedThisFrame >= _DumpsPerFrame || i % _MaxDumpsPerFrame == 0) {
-                        _DumpedThisFrame = 0;
-                        _DumpingUILabel.Text = string.Format(_DumpingUIFormat, objs[i].name, i, objs.Length);
-                        _DumpingUIBar.Size.x = ((float) i / objs.Length) * _DumpingUI.Size.x;
-                        yield return null;
-                    }
+            lock (_DumpLock) {
+                ModLogger.Log("dump", $"Dumping scene: {scene.name}");
+                Scene scenePrev = SceneManager.GetActiveScene();
+                if (scenePrev != scene) {
+                    SceneManager.SetActiveScene(scene);
+                    yield return null;
                 }
-            _DumpingUI.Visible = false;
+                GameObject[] objs = Resources.FindObjectsOfTypeAll<GameObject>();
+                if (scenePrev != scene) {
+                    SceneManager.SetActiveScene(scenePrev);
+                    yield return null;
+                }
+                _DumpingUILabel.Text = string.Format(_DumpingUIFormat, "", 0, objs.Length);
+                _DumpingUIBar.Size.x = 0;
+                _DumpingUI.Visible = true;
+                for (int i = 0; i < objs.Length; i++)
+                    if (objs[i] != null) {
+                        if (objs[i].scene != scene)
+                            continue;
+                        if (DumpContent(objs[i].transform))
+                            _DumpedThisFrame++;
+                        if (_DumpedThisFrame >= _DumpsPerFrame || i % _MaxObjectsPerFrame == 0) {
+                            _DumpedThisFrame = 0;
+                            _DumpingUILabel.Text = string.Format(_DumpingUIFormat, objs[i].name, i, objs.Length);
+                            _DumpingUIBar.Size.x = ((float) i / objs.Length) * _DumpingUI.Size.x;
+                            yield return null;
+                        }
+                    }
+                _DumpingUI.Visible = false;
+            }
         }
 
         public static bool DumpContent(Transform t) {

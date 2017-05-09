@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using YLMAPI;
 using System.IO;
+using MonoMod.Helpers;
 
 public static class YLMAPIExt {
 
@@ -64,11 +65,11 @@ public static class YLMAPIExt {
     public static string NullToEmpty(this string s)
         => s == null ? "" : s;
 
-    public static Dictionary<string, Text> GetTexts(this GameObject go) {
+    public static IDictionary<string, Text> GetTexts(this GameObject go) {
         return GetTexts(go.transform);
     }
-    public static Dictionary<string, Text> GetTexts(this Transform t) {
-        Dictionary<string, Text> texts = new Dictionary<string, Text>();
+    public static IDictionary<string, Text> GetTexts(this Transform t) {
+        FastDictionary<string, Text> texts = new FastDictionary<string, Text>();
         t.ForEach((GameObject c) => {
             Text text = c.GetComponent<Text>();
             if (text != null)

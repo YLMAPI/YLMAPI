@@ -17,6 +17,7 @@ using ReflectionHelper = MonoMod.InlineRT.ReflectionHelper;
 using System.Security.Cryptography;
 using MonoMod;
 using Mono.Cecil;
+using MonoMod.Helpers;
 
 namespace YLMAPI {
     public static class ModRelinker {
@@ -25,18 +26,18 @@ namespace YLMAPI {
 
         public static string GameChecksum;
 
-        public static Dictionary<string, ModuleDefinition> AssemblyRelinkedCache = new Dictionary<string, ModuleDefinition>() {
+        public static IDictionary<string, ModuleDefinition> AssemblyRelinkedCache = new FastDictionary<string, ModuleDefinition>() {
             { "Assembly-CSharp", ModuleDefinition.ReadModule(typeof(ModRelinker).Assembly.Location, new ReaderParameters(ReadingMode.Immediate)) },
             { "UnityEngine", ModuleDefinition.ReadModule(typeof(GameObject).Assembly.Location, new ReaderParameters(ReadingMode.Immediate)) }
         };
 
-        private static Dictionary<string, ModuleDefinition> _AssemblyRelinkMap;
-        public static Dictionary<string, ModuleDefinition> AssemblyRelinkMap {
+        private static FastDictionary<string, ModuleDefinition> _AssemblyRelinkMap;
+        public static IDictionary<string, ModuleDefinition> AssemblyRelinkMap {
             get {
                 if (_AssemblyRelinkMap != null)
                     return _AssemblyRelinkMap;
 
-                _AssemblyRelinkMap = new Dictionary<string, ModuleDefinition>();
+                _AssemblyRelinkMap = new FastDictionary<string, ModuleDefinition>();
                 string[] entries = Directory.GetFiles(ManagedDirectory);
                 for (int i = 0; i < entries.Length; i++) {
                     string path = entries[i];

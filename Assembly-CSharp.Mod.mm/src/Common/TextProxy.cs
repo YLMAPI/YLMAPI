@@ -1,12 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using MonoMod.Helpers;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class TextProxy {
 
     protected Transform root;
-    protected Dictionary<string, Text> texts = new Dictionary<string, Text>();
-    protected Dictionary<string, string> values = new Dictionary<string, string>();
+    protected IDictionary<string, Text> texts = new FastDictionary<string, Text>();
+    protected IDictionary<string, string> values = new FastDictionary<string, string>();
 
     public string this[string key] {
         get {

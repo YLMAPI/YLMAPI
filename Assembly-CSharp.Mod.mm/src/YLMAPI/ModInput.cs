@@ -9,21 +9,24 @@ using SGUI;
 using Rewired;
 using UEInput = UnityEngine.Input;
 using System.IO;
+using MonoMod.Helpers;
 
 namespace YLMAPI {
     public static partial class ModInput {
 
-        public static Dictionary<string, Func<Player, bool>> ButtonMap = new Dictionary<string, Func<Player, bool>>();
-        public static Dictionary<string, Func<Player, float>> AxisMap = new Dictionary<string, Func<Player, float>>();
+        // FastDictionary seems to cause _Not issues here.
+        public static IDictionary<string, Func<Player, bool>> ButtonMap = new Dictionary<string, Func<Player, bool>>();
+        public static IDictionary<string, Func<Player, float>> AxisMap = new Dictionary<string, Func<Player, float>>();
 
-        private static Dictionary<string, bool> _ButtonsPrev = new Dictionary<string, bool>();
+        // FastDictionary seems to cause "flickering" issues here.
+        private static IDictionary<string, bool> _ButtonsPrev = new Dictionary<string, bool>();
 
         internal static void LateUpdate() {
             Player input = ReInput.players.GetSystemPlayer();
             if (input == null)
                 return;
 
-            // For debugging purposes - when one needs to find out button IDs
+            // For debugging purposes - when one needs to map button IDs
             /**/
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < 100; i++) {

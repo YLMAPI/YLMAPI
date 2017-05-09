@@ -13,6 +13,7 @@ using System.Reflection;
 using MonoMod.Detour;
 using YLMAPI.Content.OBJ;
 using Ionic.Zip;
+using MonoMod.Helpers;
 
 namespace YLMAPI.Content {
     public static class ModContent {
@@ -47,10 +48,11 @@ namespace YLMAPI.Content {
         public static string TextsDirectory;
         public static string TextsPrefix;
 
-        public readonly static Dictionary<string, AssetMetadata> Map = new Dictionary<string, AssetMetadata>();
-        public readonly static Dictionary<string, AssetMetadata> MapDirs = new Dictionary<string, AssetMetadata>();
+        public readonly static IDictionary<string, AssetMetadata> Map = new FastDictionary<string, AssetMetadata>();
+        public readonly static IDictionary<string, AssetMetadata> MapDirs = new FastDictionary<string, AssetMetadata>();
+        public readonly static IDictionary<string, List<AssetMetadata>> MapPatches = new FastDictionary<string, List<AssetMetadata>>();
 
-        public readonly static Dictionary<string, object> Cache = new Dictionary<string, object>();
+        public readonly static IDictionary<string, object> Cache = new FastDictionary<string, object>();
         public readonly static HashSet<Type> CacheableTypes = new HashSet<Type>() {
             Types.Texture,
             Types.Texture2D,
@@ -106,19 +108,42 @@ namespace YLMAPI.Content {
             return metadata;
         }
 
+        public static bool TryGetMappedPatches(string path, out List<AssetMetadata> metadatas) {
+            if (MapPatches.TryGetValue(path, out metadatas)) return true;
+            if (MapPatches.TryGetValue(path.ToLowerInvariant(), out metadatas)) return true;
+
+            return false;
+        }
+        public static List<AssetMetadata> GetMappedPatches(string path) {
+            List<AssetMetadata> metadatas;
+            TryGetMappedPatches(path, out metadatas);
+            return metadatas;
+        }
+
         public static AssetMetadata AddMapping(string path, AssetMetadata metadata) {
             path = path.Replace('\\', '/');
             if (metadata.AssetType == null)
-                path = ParseType(path, out metadata.AssetType, out metadata.AssetFormat);
+                path = ParseType(path, out metadata.AssetType, out metadata.AssetFormat, out metadata.IsPatch);
+            if (metadata.IsPatch)
+                return AddMappingPatch(path, metadata);
             if (metadata.AssetType == Types.AssetTypeDirectory)
-                return MapDirs[path] = metadata;
+                return MapDirs[path] = MapDirs[path.ToLowerInvariant()] = metadata;
 
-            return Map[path] = metadata;
+            return Map[path] = Map[path.ToLowerInvariant()] = metadata;
         }
 
-        public static string ParseType(string file, out Type type, out string format) {
+        public static AssetMetadata AddMappingPatch(string path, AssetMetadata metadata) {
+            List<AssetMetadata> metadatas;
+            if (!TryGetMappedPatches(path, out metadatas))
+                MapPatches[path] = MapPatches[path.ToLowerInvariant()] = metadatas = new List<AssetMetadata>();
+            metadatas.Add(metadata);
+            return metadata;
+        }
+
+        public static string ParseType(string file, out Type type, out string format, out bool isPatch) {
             type = Types.Object;
             format = file.Length < 4 ? null : file.Substring(file.Length - 3);
+            isPatch = false;
 
             if (file.EndsWith(".dll")) {
                 type = Types.AssetTypeAssembly;
@@ -131,7 +156,10 @@ namespace YLMAPI.Content {
                 file = file.Substring(0, file.Length - 4);
             }
 
-            // TODO: Check for .patch.*, handle patches separately.
+            if (file.EndsWith(".patch")) {
+                isPatch = true;
+                file = file.Substring(0, file.Length - 6);
+            }
 
             return file;
         }
@@ -141,6 +169,7 @@ namespace YLMAPI.Content {
 
             Map.Clear();
             MapDirs.Clear();
+            MapPatches.Clear();
 
             for (int i = 0; i < Mods.Count; i++)
                 Crawl(Mods[i]);
@@ -227,6 +256,7 @@ namespace YLMAPI.Content {
                 return obj;
 
             obj = LoadUncached(path, type);
+            obj = Patch(path, obj);
 
             if (CacheableTypes.Contains(type))
                 Cache[path] = obj;
@@ -250,7 +280,7 @@ namespace YLMAPI.Content {
             if ((type == Types.Texture || type == Types.Texture2D) &&
                 metadata.AssetType == Types.Texture2D) {
                 Texture2D tex = new Texture2D(2, 2);
-                tex.name = Path.GetFileName(path);
+                tex.name = path;
                 tex.LoadImage(metadata.Data);
                 return tex;
             }
@@ -272,6 +302,13 @@ namespace YLMAPI.Content {
 
             NoMetadata:
             return null;
+        }
+
+        public static object Patch(string path, object obj) {
+            if (obj is Texture2D)
+                return ((Texture2D) obj).Patch(GetMappedPatches(path));
+
+            return obj;
         }
 
     }

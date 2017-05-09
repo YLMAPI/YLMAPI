@@ -167,19 +167,17 @@ namespace YLMAPI {
                                     }
                                 },
 
-                                /*
-                                new SButton("Recrawl content mods") {
-                                    Alignment = TextAnchor.MiddleLeft,
-                                    OnClick = b => {
-                                        // ModContent.Recrawl();
-                                    }
-                                },
-                                */
-
                                 new SButton("Patch content in scene") {
                                     Alignment = TextAnchor.MiddleLeft,
                                     OnClick = b => {
                                         ModContentPatcher.PatchContent(SceneManager.GetActiveScene()).StartGlobal();
+                                    }
+                                },
+
+                                new SButton("Dump content in scene") {
+                                    Alignment = TextAnchor.MiddleLeft,
+                                    OnClick = b => {
+                                        ModContentDumper.DumpContent(SceneManager.GetActiveScene()).StartGlobal();
                                     }
                                 }
                             }

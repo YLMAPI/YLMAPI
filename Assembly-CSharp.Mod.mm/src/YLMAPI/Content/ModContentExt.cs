@@ -82,6 +82,109 @@ namespace YLMAPI.Content {
             return texture;
         }
 
+        public static Texture2D Patch(this Texture2D texture, params Texture2D[] patches) {
+            if (texture == null)
+                return null;
+            if (patches == null || patches.Length == 0)
+                return texture;
+
+            RenderTexture patchRT = RenderTexture.GetTemporary(
+                texture.width, texture.height, 0,
+                RenderTextureFormat.Default, RenderTextureReadWrite.Default
+            );
+
+            Graphics.Blit(texture, patchRT);
+
+            RenderTexture previousRT = RenderTexture.active;
+            RenderTexture.active = patchRT;
+
+            GL.PushMatrix();
+            GL.LoadPixelMatrix(0f, 1f, 1f, 0f);
+
+            for (int i = 0; i < patches.Length; i++)
+                Graphics.DrawTexture(new Rect(0, 0, 1f, 1f), patches[i]);
+
+            GL.PopMatrix();
+
+            texture.ReadPixels(new Rect(0, 0, patchRT.width, patchRT.height), 0, 0);
+            texture.Apply(true, false);
+
+            RenderTexture.active = previousRT;
+            RenderTexture.ReleaseTemporary(patchRT);
+
+            return texture;
+        }
+
+        public static Texture2D Patch(this Texture2D texture, List<Texture2D> patches) {
+            if (texture == null)
+                return null;
+            if (patches == null || patches.Count == 0)
+                return texture;
+
+            RenderTexture patchRT = RenderTexture.GetTemporary(
+                texture.width, texture.height, 0,
+                RenderTextureFormat.Default, RenderTextureReadWrite.Default
+            );
+
+            Graphics.Blit(texture, patchRT);
+
+            RenderTexture previousRT = RenderTexture.active;
+            RenderTexture.active = patchRT;
+
+            GL.PushMatrix();
+            GL.LoadPixelMatrix(0f, 1f, 1f, 0f);
+
+            for (int i = 0; i < patches.Count; i++)
+                Graphics.DrawTexture(new Rect(0, 0, 1f, 1f), patches[i]);
+
+            GL.PopMatrix();
+
+            texture.ReadPixels(new Rect(0, 0, patchRT.width, patchRT.height), 0, 0);
+            texture.Apply(true, false);
+
+            RenderTexture.active = previousRT;
+            RenderTexture.ReleaseTemporary(patchRT);
+
+            return texture;
+        }
+
+        public static Texture2D Patch(this Texture2D texture, List<AssetMetadata> patches) {
+            if (texture == null)
+                return null;
+            if (patches == null || patches.Count == 0)
+                return texture;
+
+            RenderTexture patchRT = RenderTexture.GetTemporary(
+                texture.width, texture.height, 0,
+                RenderTextureFormat.Default, RenderTextureReadWrite.Default
+            );
+
+            Graphics.Blit(texture, patchRT);
+
+            RenderTexture previousRT = RenderTexture.active;
+            RenderTexture.active = patchRT;
+
+            GL.PushMatrix();
+            GL.LoadPixelMatrix(0f, 1f, 1f, 0f);
+
+            Texture2D tex = new Texture2D(2, 2);
+            for (int i = 0; i < patches.Count; i++) {
+                tex.LoadImage(patches[i].Data);
+                Graphics.DrawTexture(new Rect(0, 0, 1f, 1f), tex);
+            }
+            UnityEngine.Object.Destroy(tex);
+
+            GL.PopMatrix();
+
+            texture.ReadPixels(new Rect(0, 0, patchRT.width, patchRT.height), 0, 0);
+            texture.Apply(true, false);
+
+            RenderTexture.active = previousRT;
+            RenderTexture.ReleaseTemporary(patchRT);
+
+            return texture;
+        }
+
         public static Texture2D GetRW(this Texture2D texture) {
             if (texture == null)
                 return null;

@@ -15,6 +15,7 @@ using Ionic.Zip;
 using MonoMod.InlineRT;
 using ReflectionHelper = MonoMod.InlineRT.ReflectionHelper;
 using YLMAPI.Content;
+using MonoMod.Helpers;
 
 namespace YLMAPI {
     public static class ModLoader {
@@ -25,7 +26,7 @@ namespace YLMAPI {
 
         public readonly static List<GameMod> Mods = new List<GameMod>();
         private static List<Type> _ModuleTypes = new List<Type>();
-        private static List<Dictionary<string, MethodInfo>> _ModuleMethods = new List<Dictionary<string, MethodInfo>>();
+        private static List<IDictionary<string, MethodInfo>> _ModuleMethods = new List<IDictionary<string, MethodInfo>>();
 
         public static string ModsDirectory;
         public static string ModsCacheDirectory;
@@ -249,7 +250,7 @@ namespace YLMAPI {
 
                 Mods.Add(mod);
                 _ModuleTypes.Add(type);
-                _ModuleMethods.Add(new Dictionary<string, MethodInfo>());
+                _ModuleMethods.Add(new FastDictionary<string, MethodInfo>());
             }
 
             ModLogger.Log("loader", $"Mod {meta} initialized.");
@@ -332,7 +333,7 @@ namespace YLMAPI {
             }
             for (int i = 0; i < _ModuleTypes.Count; i++) {
                 GameMod mod = Mods[i];
-                Dictionary<string, MethodInfo> moduleMethods = _ModuleMethods[i];
+                IDictionary<string, MethodInfo> moduleMethods = _ModuleMethods[i];
                 MethodInfo method;
                 if (moduleMethods.TryGetValue(methodName, out method)) {
                     method?.GetDelegate()?.Invoke(Mods[i], args);

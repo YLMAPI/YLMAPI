@@ -17,7 +17,7 @@ namespace YLMAPI.Content {
 
         private static int _PatchedThisFrame = 0;
         private const int _PatchesPerFrame = 32;
-        private const int _MaxPatchesPerFrame = 512;
+        private const int _MaxObjectsPerFrame = 512;
 
         public static bool IsInitialized { get; internal set; }
 
@@ -102,29 +102,45 @@ namespace YLMAPI.Content {
             yield return loader;
         }
 
+        private readonly static object _PatchLock = new object();
         public static IEnumerator PatchContent(Scene scene) {
-            ModLogger.Log("content", $"Patching scene content: {scene.name}");
-            Scene scenePrev = SceneManager.GetActiveScene();
-            if (scenePrev != scene) {
-                SceneManager.SetActiveScene(scene);
-                yield return null;
-            }
-            GameObject[] objs = Resources.FindObjectsOfTypeAll<GameObject>();
-            if (scenePrev != scene) {
-                SceneManager.SetActiveScene(scenePrev);
-                yield return null;
-            }
-            for (int i = 0; i < objs.Length; i++)
-                if (objs[i] != null) {
-                    if (objs[i].scene != scene)
-                        continue;
-                    if (PatchContent(objs[i].transform))
-                        _PatchedThisFrame++;
-                    if (_PatchedThisFrame >= _PatchesPerFrame || i % _MaxPatchesPerFrame == 0) {
-                        _PatchedThisFrame = 0;
-                        yield return null;
-                    }
+            lock (_PatchLock) {
+                ModLogger.Log("content", $"Patching scene content: {scene.name}");
+                Scene scenePrev = SceneManager.GetActiveScene();
+                if (scenePrev != scene) {
+                    SceneManager.SetActiveScene(scene);
+                    yield return null;
                 }
+                GameObject[] objs = Resources.FindObjectsOfTypeAll<GameObject>();
+                if (scenePrev != scene) {
+                    SceneManager.SetActiveScene(scenePrev);
+                    yield return null;
+                }
+                for (int i = 0; i < objs.Length; i++)
+                    if (objs[i] != null) {
+                        if (objs[i].scene != scene)
+                            continue;
+                        if (PatchContent(objs[i].transform))
+                            _PatchedThisFrame++;
+                        if (_PatchedThisFrame >= _PatchesPerFrame || i % _MaxObjectsPerFrame == 0) {
+                            _PatchedThisFrame = 0;
+                            yield return null;
+                        }
+                    }
+            }
+        }
+
+        public static bool PatchContentRecursive(Transform t) {
+            if (t == null)
+                return false;
+
+            bool patched = PatchContent(t);
+
+            int children = t.childCount;
+            for (int i = 0; i < children; i++)
+                patched |= PatchContentRecursive(t.GetChild(i));
+
+            return patched;
         }
 
         public static bool PatchContent(Transform t) {
@@ -209,12 +225,12 @@ namespace YLMAPI.Content {
                 path = "Textures/" + tex.name;
 
             path = ModContent.PatchesPrefix + path;
-            bool patched = false;
             AssetMetadata meta;
+            List<AssetMetadata> patches;
 
             if (ModContent.TryGetMapped("Textures/_uv_all", out meta)) {
                 tex = ModContent.Load<Texture2D>(path);
-                patched = true;
+                return true;
             }
 
             if (ModContent.TryGetMapped(path, out meta)) {
@@ -223,15 +239,15 @@ namespace YLMAPI.Content {
                 } else {
                     // TODO: Animation metadata type
                 }
-                patched = true;
+                return true;
             }
 
-            if (ModContent.TryGetMapped(path + ".patch", out meta)) {
-                tex = tex.Copy().Patch(ModContent.Load<Texture2D>(path + ".patch"));
-                patched = true;
+            if (ModContent.TryGetMappedPatches(path, out patches)) {
+                tex = tex.Copy().Patch(patches);
+                return true;
             }
 
-            return patched;
+            return false;
         }
 
         public static bool PatchContent(Component c, ref Mesh mesh, string path) {
